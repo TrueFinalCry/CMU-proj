@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
@@ -30,6 +31,7 @@ public class FriendsActivity extends AppCompatActivity {
     UsersAdapter.OnUserClickListener onUserClickListener;
 
     private SwipeRefreshLayout swipeRefreshLayout;
+    String myImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +55,14 @@ public class FriendsActivity extends AppCompatActivity {
         onUserClickListener = new UsersAdapter.OnUserClickListener() {
             @Override
             public void onUserClicked(int position) {
+                startActivity(new Intent(FriendsActivity.this, ChatRoomActivity.class)
+                        // arguments of chatroom (1 user so far)
+                        .putExtra("username_of_roommate", users.get(position).getUsername())
+                        .putExtra("email_of_roommate", users.get(position).getEmail())
+                        .putExtra("img_of_roommate",users.get(position).getProfilePicture())
+                        .putExtra("my_image", myImage)
+
+                );
                 Toast.makeText(FriendsActivity.this, "Selected user "+ users.get(position).getUsername(), Toast.LENGTH_SHORT).show();
             }
         };
@@ -79,6 +89,7 @@ public class FriendsActivity extends AppCompatActivity {
         FirebaseDatabase.getInstance().getReference("user").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                //cycles through all users (maybe we need chatrooms instead)
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                      users.add(dataSnapshot.getValue(User.class));
                 }
@@ -87,6 +98,14 @@ public class FriendsActivity extends AppCompatActivity {
                 recyclerView.setAdapter(usersAdapter);
                 progressBar.setVisibility(View.GONE);
                 recyclerView.setVisibility(View.VISIBLE);
+
+                for(User user : users) {
+                    if(user.getEmail().equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
+                        myImage = user.getProfilePicture();
+                        // maybe remove myself from list
+                        return;
+                    }
+                }
             }
 
             @Override
