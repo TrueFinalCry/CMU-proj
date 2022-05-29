@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "88418880076",
+    "firebase_url": "https://conversationalist-3003c-default-rtdb.firebaseio.com",
+    "project_id": "conversationalist-3003c",
+    "storage_bucket": "conversationalist-3003c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:88418880076:android:a1afa1f77c14f94b6b02e9",
+        "android_client_info": {
+          "package_name": "com.example.conversationalist"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "88418880076-qfhb04io68p3g0qstd6qarmvf2vvl9g6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA-8vj9PyvMVPocRNjerSwDhIBRyjQFiUw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "88418880076-qfhb04io68p3g0qstd6qarmvf2vvl9g6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
