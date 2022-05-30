@@ -51,6 +51,9 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, "Invalid input", Toast.LENGTH_SHORT).show();
                         return;
                     }
+                    Toast.makeText(MainActivity.this, "Invalid input", Toast.LENGTH_SHORT).show();
+                    return;
+
                 }
 
                 if(isSigningUp) {
