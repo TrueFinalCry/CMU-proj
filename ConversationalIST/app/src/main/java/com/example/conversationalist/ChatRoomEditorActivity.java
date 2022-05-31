@@ -1,11 +1,5 @@
 package com.example.conversationalist;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -15,9 +9,15 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -32,53 +32,41 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.IOException;
+import java.lang.ref.Reference;
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class Profile extends AppCompatActivity {
 
-    private Button btnLogOut;
-    private ImageView imgProfile;
-    private TextView usernameProfile;
+public class ChatRoomEditorActivity extends AppCompatActivity {
+
+    private TextView chatRoomName;
+    private Button updateAllInfo;
+    private EditText editTextUsername;
+    private ImageView chatImage;
     private Uri imagePath;
-    private Button btnUpload;
-    private String myImage, myUsername;
 
+    private String chatRoomId, chatRoomImage;
+    private Reference chatRoomReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profile);
+        setContentView(R.layout.activity_chat_editor);
 
-        btnLogOut = findViewById(R.id.btnLogOut);
-        btnUpload = findViewById(R.id.btnUpLoadImage);
-        imgProfile = findViewById(R.id.profile_img);
-        usernameProfile = findViewById(R.id.txtUsername);
+        chatRoomName = findViewById(R.id.chatRoomName);
+        updateAllInfo = findViewById(R.id.updateAllInfo);
+        editTextUsername = findViewById(R.id.editTextUsername);
+        chatImage = findViewById(R.id.chatImage);
 
-        myImage = getIntent().getStringExtra("my_image");
-        myUsername = getIntent().getStringExtra("my_username");
+        chatRoomId = getIntent().getStringExtra("room_id");
+        chatRoomImage = getIntent().getStringExtra("room_image");
 
-        usernameProfile.setText(myUsername);
+        chatRoomName.setText(chatRoomId);
 
-        Glide.with(Profile.this).load(myImage).placeholder(R.drawable.account_image).error(R.drawable.account_image).into(imgProfile);
 
-        btnUpload.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                uploadImage();
-            }
-        });
+        Glide.with(ChatRoomEditorActivity.this).load(chatRoomImage).placeholder(R.drawable.account_image).error(R.drawable.account_image).into(chatImage);
 
-        btnLogOut.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FirebaseAuth.getInstance().signOut();
-                startActivity(new Intent(Profile.this, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP));
-                finish();
-            }
-        });
-
-        imgProfile.setOnClickListener(new View.OnClickListener() {
+        chatImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent photoIntent = new Intent(Intent.ACTION_PICK);
@@ -106,13 +94,19 @@ public class Profile extends AppCompatActivity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                imgProfile.setImageBitmap(bitmap);
+                Glide.with(ChatRoomEditorActivity.this).load(imagePath).placeholder(R.drawable.account_image).error(R.drawable.account_image).into(chatImage);
+            }
+        });
+
+        updateAllInfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                upload();
             }
         });
     }
 
-
-    private void uploadImage() {
+    private void upload() {
         ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("Uploading...");
         progressDialog.show();
@@ -126,13 +120,13 @@ public class Profile extends AppCompatActivity {
                             @Override
                             public void onComplete(@NonNull Task<Uri> task) {
                                 if(task.isSuccessful()) {
-                                    updateProfilePicture(task.getResult().toString());
+                                    update(task.getResult().toString(), editTextUsername.getText().toString());
                                 }
                             }
                         });
-                        Toast.makeText(Profile.this, "Uploaded successfully", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ChatRoomEditorActivity.this, "Uploaded successfully", Toast.LENGTH_SHORT).show();
                     } else {
-                        Toast.makeText(Profile.this, task.getException().getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ChatRoomEditorActivity.this, task.getException().getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                     }
                     progressDialog.dismiss();
                 }
@@ -144,15 +138,40 @@ public class Profile extends AppCompatActivity {
                 }
             });
         } else {
+            update(chatRoomImage, editTextUsername.getText().toString());
             progressDialog.dismiss();
         }
     }
 
-    private void updateProfilePicture(String url) {
-        myImage = url;
-        FirebaseDatabase.getInstance().getReference("user/"+ FirebaseAuth.getInstance().getCurrentUser().getUid() + "/profilePicture").setValue(url);
+    private void update(String url, String username) {
+        chatRoomImage = url;
+        FirebaseDatabase.getInstance().getReference("chatRoom").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                //cycles through all users (maybe we need chatrooms instead)
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    String roomId = dataSnapshot.child("chatRoomId").getValue(String.class);
+                    if (chatRoomId.equals(roomId)) {
+                        dataSnapshot.child("chatImage").getRef().setValue(url);
+                        for (DataSnapshot ds : dataSnapshot.child("users").getChildren()) {
+                            if(ds.child("email").getValue(String.class).equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
+                                if(!username.equals("")) {
+                                    ds.child("username").getRef().setValue(username);
+                                }
+                                break;
+                            }
+                        }
+                        break;
+                    }
 
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+        //txtChatRoom.setText("");
     }
-
-
 }

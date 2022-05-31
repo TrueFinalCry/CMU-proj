@@ -25,6 +25,9 @@
             android:name=".FriendsActivity"
             android:exported="false" />
         <activity
+            android:name=".ChatRoomEditorActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>

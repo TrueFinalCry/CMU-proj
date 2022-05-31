@@ -1,24 +1,28 @@
 package com.example.conversationalist;
 
 public class Message {
-    private String sender,receiver,content;
+    private String sender,content;
     private String chatRoomId, senderImg;
+    private String username;
     // private string reactions
 
     public Message() {
     }
 
-    public Message(String sender, String content, String chatRoomId, String senderImg) {
+    public Message(String sender,String senderImg, String content, String chatRoomId, String username) {
         this.sender = sender;
         this.content = content;
         this.chatRoomId = chatRoomId;
         this.senderImg = senderImg;
+        this.username = username;
     }
 
-    public Message(String sender, String receiver, String content) {
-        this.sender = sender;
-        this.receiver = receiver;
-        this.content = content;
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getChatRoomId() {
@@ -43,14 +47,6 @@ public class Message {
 
     public void setSender(String sender) {
         this.sender = sender;
-    }
-
-    public String getReceiver() {
-        return receiver;
-    }
-
-    public void setReceiver(String receiver) {
-        this.receiver = receiver;
     }
 
     public String getContent() {

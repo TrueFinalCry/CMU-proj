@@ -32,12 +32,19 @@
             android:id="@+id/txt_message_content"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="9dp"
-            tools:text="adwdadadddddddd dddddddddddd ddddddddddddddddddw"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginVertical="5dp"
             android:maxWidth="200dp"
+            android:background="@color/cardview_shadow_start_color"
             android:padding="8dp"/>
 
-
+        <TextView
+            android:id="@+id/txt_username_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="5dp"
+            android:maxWidth="200dp"
+            android:padding="8dp"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

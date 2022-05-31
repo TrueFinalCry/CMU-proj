@@ -12,6 +12,7 @@
         android:layout_width="0dp"
         android:layout_height="75dp"
         android:orientation="horizontal"
+        android:background="@color/cardview_shadow_start_color"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -23,7 +24,9 @@
             app:cardCornerRadius="44dp">
 
             <ImageView
-                android:id="@+id/small_profile_img"
+                android:id="@+id/small_chatroom_img"
+                android:scaleType="centerCrop"
+                android:src="@drawable/account_image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
 

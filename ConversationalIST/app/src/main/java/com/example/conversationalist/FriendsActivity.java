@@ -42,7 +42,6 @@ public class FriendsActivity extends AppCompatActivity {
     UsersAdapter.OnUserClickListener onUserClickListener;
 
     private SwipeRefreshLayout swipeRefreshLayout;
-    String myImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,26 +100,16 @@ public class FriendsActivity extends AppCompatActivity {
                 startActivity(new Intent(FriendsActivity.this, ChatRoomActivity.class)
                         // arguments of chatroom (1 user so far)
                         .putExtra("room_id", chatRooms.get(position).getChatRoomId())
+                        .putExtra("room_image", chatRooms.get(position).getChatImage())
+                        .putExtra("my_image", myUser.getProfilePicture())
+                        .putExtra("my_username", myUser.getUsername())
+
                 );
                 Toast.makeText(FriendsActivity.this, "Selected chatroom "+ chatRooms.get(position).getChatRoomId(), Toast.LENGTH_SHORT).show();
             }
         };
 
 
-        onUserClickListener = new UsersAdapter.OnUserClickListener() {
-            @Override
-            public void onUserClicked(int position) {
-                startActivity(new Intent(FriendsActivity.this, ChatRoomActivity.class)
-                        // arguments of chatroom (1 user so far)
-                        .putExtra("username_of_roommate", users.get(position).getUsername())
-                        .putExtra("email_of_roommate", users.get(position).getEmail())
-                        .putExtra("img_of_roommate",users.get(position).getProfilePicture())
-                        .putExtra("my_image", myImage)
-
-                );
-                Toast.makeText(FriendsActivity.this, "Selected user "+ users.get(position).getUsername(), Toast.LENGTH_SHORT).show();
-            }
-        };
 
 
         addChatRoom.setOnClickListener(new View.OnClickListener() {
@@ -131,8 +120,8 @@ public class FriendsActivity extends AppCompatActivity {
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         //cycles through all users (maybe we need chatrooms instead)
                         for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                            String chatRoomId = dataSnapshot.child("chatRoomId").getValue(String.class);
-                            if (txtChatRoom.getText().toString().equals(chatRoomId)) {
+                            String roomId = dataSnapshot.child("chatRoomId").getValue(String.class);
+                            if (txtChatRoom.getText().toString().equals(roomId)) {
                                 for(DataSnapshot ds : dataSnapshot.child("users").getChildren()) {
                                     String email = ds.child("email").getValue(String.class);
                                     if(myUser.getEmail().equals(email)) {
@@ -160,8 +149,8 @@ public class FriendsActivity extends AppCompatActivity {
                            public void onDataChange(@NonNull DataSnapshot snapshot) {
                                //cycles through all users (maybe we need chatrooms instead)
                                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                                   String chatRoomId = dataSnapshot.child("chatRoomId").getValue(String.class);
-                                   if (txtChatRoom.getText().toString().equals(chatRoomId)) {
+                                   String roomId = dataSnapshot.child("chatRoomId").getValue(String.class);
+                                   if (txtChatRoom.getText().toString().equals(roomId)) {
                                        dataSnapshot.child("users").getRef().push().setValue(myUser);
                                        //FirebaseDatabase.getInstance().getReference("chatRoom/"+txtChatRoom.getText().toString()+"/users").push().setValue(myUser);
                                    }
@@ -183,9 +172,8 @@ public class FriendsActivity extends AppCompatActivity {
                 //txtChatRoom.setText("");
             }
         });
-        getChatRooms();
 
-        //getUsers();
+        getChatRooms();
     }
 
     @Override
@@ -197,42 +185,28 @@ public class FriendsActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.menu_item_profile) {
-            startActivity(new Intent(FriendsActivity.this,Profile.class));
+            startActivity(new Intent(FriendsActivity.this,Profile.class)
+                    .putExtra("my_image", myUser.getProfilePicture())
+                    .putExtra("my_username", myUser.getUsername())
+            );
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void getUsers() {
-        users.clear();
-        FirebaseDatabase.getInstance().getReference("user").addListenerForSingleValueEvent(new ValueEventListener() {
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        FirebaseDatabase.getInstance().getReference("user/"+ FirebaseAuth.getInstance().getCurrentUser().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                //cycles through all users (maybe we need chatrooms instead)
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                     users.add(dataSnapshot.getValue(User.class));
-                }
-                usersAdapter = new UsersAdapter(users, FriendsActivity.this, onUserClickListener);
-                recyclerView.setLayoutManager(new LinearLayoutManager(FriendsActivity.this));
-                recyclerView.setAdapter(usersAdapter);
-                progressBar.setVisibility(View.GONE);
-                recyclerView.setVisibility(View.VISIBLE);
-                addChatRoom.setVisibility(View.VISIBLE);
-                txtChatRoom.setVisibility(View.VISIBLE);
-
-                for(User user : users) {
-                    if(user.getEmail().equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
-                        myImage = user.getProfilePicture();
-                        // maybe remove myself from list
-                        return;
-                    }
-                }
+                //cycles through all chatroom
+                myUser.setProfilePicture(snapshot.child("profilePicture").getValue().toString());
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
             }
         });
+        getChatRooms();
     }
 
     private void getChatRooms() {
@@ -253,11 +227,11 @@ public class FriendsActivity extends AppCompatActivity {
                     }
 
                     ChatRoom chatRoom = new ChatRoom(
-                            dataSnapshot.child("chatImage").getValue(String.class),
+                            dataSnapshot.child("type").getValue(String.class),
                             dataSnapshot.child("chatRoomId").getValue(String.class),
                             userList,
                             messageList,
-                            dataSnapshot.child("type").getValue(String.class)
+                            dataSnapshot.child("chatImage").getValue(String.class)
                     );
 
                     for (User user : chatRoom.getUsers()) {

@@ -22,13 +22,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageH
     private ArrayList<Message> messages;
     // sender and receiver only will work on 2 man chatroom might need to be a list of sender images
     // USER is senderImg
-    private String senderImg, receiverImg;
     private Context context;
 
-    public MessageAdapter(ArrayList<Message> messages, String senderImg, String receiverImg, Context context) {
+    public MessageAdapter(ArrayList<Message> messages, Context context) {
         this.messages = messages;
-        this.senderImg = senderImg;
-        this.receiverImg = receiverImg;
         this.context = context;
     }
 
@@ -42,34 +39,42 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageH
     @Override
     public void onBindViewHolder(@NonNull MessageHolder holder, int position) {
         holder.txtMessage.setText(messages.get(position).getContent());
+        holder.txtUsername.setText(messages.get(position).getUsername());
 
         ConstraintLayout constraintLayout = holder.ccll;
 
         // if the message is ours, put on the right from the left
         if(messages.get(position).getSender().equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
             // USER
-            Glide.with(context).load(senderImg).error(R.drawable.account_image).placeholder(R.drawable.account_image).into(holder.profImage);
+            Glide.with(context).load(messages.get(position).getSenderImg()).error(R.drawable.account_image).placeholder(R.drawable.account_image).into(holder.profImage);
             ConstraintSet constraintSet = new ConstraintSet();
             constraintSet.clone(constraintLayout);
 
             constraintSet.clear(R.id.profile_cardView, ConstraintSet.LEFT);
             constraintSet.clear(R.id.txt_message_content, ConstraintSet.LEFT);
+            constraintSet.clear(R.id.txt_username_content, ConstraintSet.LEFT);
 
             constraintSet.connect(R.id.profile_cardView, ConstraintSet.RIGHT, R.id.ccLayout, ConstraintSet.RIGHT, 0);
-            constraintSet.connect(R.id.txt_message_content, ConstraintSet.RIGHT, R.id.profile_cardView, ConstraintSet.LEFT, 0);
+            constraintSet.connect(R.id.txt_message_content, ConstraintSet.RIGHT, R.id.ccLayout, ConstraintSet.RIGHT, 0);
+            constraintSet.connect(R.id.txt_message_content, ConstraintSet.TOP, R.id.profile_cardView, ConstraintSet.BOTTOM, 0);
+            constraintSet.connect(R.id.txt_username_content, ConstraintSet.RIGHT, R.id.profile_cardView, ConstraintSet.LEFT, 0);
+
             constraintSet.applyTo(constraintLayout);
 
         } else {
             // Others
-            Glide.with(context).load(receiverImg).error(R.drawable.account_image).placeholder(R.drawable.account_image).into(holder.profImage);
+            Glide.with(context).load(messages.get(position).getSenderImg()).error(R.drawable.account_image).placeholder(R.drawable.account_image).into(holder.profImage);
             ConstraintSet constraintSet = new ConstraintSet();
             constraintSet.clone(constraintLayout);
 
             constraintSet.clear(R.id.profile_cardView, ConstraintSet.RIGHT);
             constraintSet.clear(R.id.txt_message_content, ConstraintSet.RIGHT);
+            constraintSet.clear(R.id.txt_username_content, ConstraintSet.RIGHT);
 
             constraintSet.connect(R.id.profile_cardView, ConstraintSet.LEFT, R.id.ccLayout, ConstraintSet.LEFT, 0);
-            constraintSet.connect(R.id.txt_message_content, ConstraintSet.LEFT, R.id.profile_cardView, ConstraintSet.RIGHT, 0);
+            constraintSet.connect(R.id.txt_message_content, ConstraintSet.LEFT, R.id.ccLayout, ConstraintSet.LEFT, 0);
+            constraintSet.connect(R.id.txt_message_content, ConstraintSet.TOP, R.id.profile_cardView, ConstraintSet.BOTTOM, 0);
+            constraintSet.connect(R.id.txt_username_content, ConstraintSet.LEFT, R.id.profile_cardView, ConstraintSet.RIGHT, 0);
             constraintSet.applyTo(constraintLayout);
         }
     }
@@ -82,12 +87,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageH
     class MessageHolder extends RecyclerView.ViewHolder {
         ConstraintLayout ccll;
         TextView txtMessage;
+        TextView txtUsername;
         ImageView profImage;
         public MessageHolder(@NonNull View itemView) {
             super(itemView);
 
             ccll = itemView.findViewById(R.id.ccLayout);
             txtMessage = itemView.findViewById(R.id.txt_message_content);
+            txtUsername = itemView.findViewById(R.id.txt_username_content);
             profImage = itemView.findViewById(R.id.small_profile_img);
 
         }
