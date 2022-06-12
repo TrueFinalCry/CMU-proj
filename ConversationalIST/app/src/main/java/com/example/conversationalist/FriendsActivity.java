@@ -1,7 +1,10 @@
 package com.example.conversationalist;
 
+import static androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -45,6 +48,7 @@ public class FriendsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friends);
+
 
         progressBar = findViewById(R.id.progressBar);
         users = new ArrayList<>();
@@ -155,31 +159,15 @@ public class FriendsActivity extends AppCompatActivity {
 
     private void getChatRooms() {
         chatRooms.clear();
-        FirebaseDatabase.getInstance().getReference("chatRoom").addListenerForSingleValueEvent(new ValueEventListener() {
+        FirebaseDatabase.getInstance().getReference("user/" + FirebaseAuth.getInstance().getCurrentUser().getUid() + "/chatrooms").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 //cycles through all users (maybe we need chatrooms instead)
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-
-
-
                     ArrayList<String> userList = new ArrayList<>();
                     ArrayList<Message> messageList = new ArrayList<>();
 
-                    boolean in = false;
 
-                    for (DataSnapshot ds : dataSnapshot.child("users").getChildren()) {
-                        if (ds.getValue(String.class).equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
-                            in = true;
-                        }
-                        userList.add(ds.getValue(String.class));
-                    }
-                    if (!in) {
-                        continue;
-                    }
-                    for (DataSnapshot ds : dataSnapshot.child("messages").getChildren()) {
-                        messageList.add(ds.getValue(Message.class));
-                    }
 
                     ChatRoom chatRoom = new ChatRoom(
                             dataSnapshot.child("type").getValue(String.class),

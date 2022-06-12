@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.app.Activity;
@@ -37,7 +38,7 @@ import java.util.UUID;
 
 public class Profile extends AppCompatActivity {
 
-    private Button btnLogOut;
+    private Button btnLogOut, btnLightMode, btnDarkMode;
     private ImageView imgProfile;
     private TextView usernameProfile;
     private Uri imagePath;
@@ -54,6 +55,8 @@ public class Profile extends AppCompatActivity {
         btnUpload = findViewById(R.id.btnUpLoadImage);
         imgProfile = findViewById(R.id.profile_img);
         usernameProfile = findViewById(R.id.txtUsername);
+        btnLightMode = findViewById(R.id.lightMode);
+        btnDarkMode = findViewById(R.id.darkMode);
 
         myImage = getIntent().getStringExtra("my_image");
         myUsername = getIntent().getStringExtra("my_username");
@@ -62,6 +65,18 @@ public class Profile extends AppCompatActivity {
 
         Glide.with(Profile.this).load(myImage).placeholder(R.drawable.account_image).error(R.drawable.account_image).into(imgProfile);
 
+        btnDarkMode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+            }
+        });
+        btnLightMode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+            }
+        });
         btnUpload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

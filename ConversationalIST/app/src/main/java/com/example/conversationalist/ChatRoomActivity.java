@@ -195,35 +195,31 @@ public class ChatRoomActivity extends AppCompatActivity {
     }
 
     private void attachMessageListener(String chatRoomId) {
-        FirebaseDatabase.getInstance().getReference("chatRoom").addListenerForSingleValueEvent(new ValueEventListener() {
+        FirebaseDatabase.getInstance().getReference("chatRoom/" + chatRoomUid).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                //cycles through all chatroom
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    String roomId = dataSnapshot.child("chatRoomId").getValue(String.class);
-                    if (chatRoomId.equals(roomId)) {
-                        dataSnapshot.child("messages").getRef().addValueEventListener(new ValueEventListener() {
-                            @SuppressLint("NotifyDataSetChanged")
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                messages.clear();
-                                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                                    messages.add(dataSnapshot.getValue(Message.class));
-                                }
-                                messageAdapter.notifyDataSetChanged();
-                                recyclerView.scrollToPosition(messages.size()-1);
-                                recyclerView.setVisibility(View.VISIBLE);
-                                progressBar.setVisibility(View.GONE);
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-
-                            }
-                        });
+            //cycles through all chatroom
+            snapshot.child("messages").getRef().addValueEventListener(new ValueEventListener() {
+                    @SuppressLint("NotifyDataSetChanged")
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        messages.clear();
+                        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                            messages.add(dataSnapshot.getValue(Message.class));
+                        }
+                        messageAdapter.notifyDataSetChanged();
+                        recyclerView.scrollToPosition(messages.size()-1);
+                        recyclerView.setVisibility(View.VISIBLE);
+                        progressBar.setVisibility(View.GONE);
                     }
-                }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
             }
+
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
             }

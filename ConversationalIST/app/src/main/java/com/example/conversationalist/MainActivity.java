@@ -23,7 +23,7 @@ import com.google.firebase.database.ValueEventListener;
 public class MainActivity extends AppCompatActivity {
 
     private EditText edtUsername, edtPassword, edtEmail;
-    private Button btnSubmit;
+    private Button btnSubmit, btnGuest;
     private TextView txtLoginInfo;
 
     private boolean isSigningUp = true;
@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
         edtEmail = findViewById(R.id.edtEmail);
         edtPassword = findViewById(R.id.edtPassword);
         edtUsername = findViewById(R.id.edtUsername);
+        btnGuest = findViewById(R.id.btnGuest);
 
         btnSubmit = findViewById(R.id.btnSubmit);
 
@@ -64,6 +65,23 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     handleLogin();
                 }
+            }
+        });
+
+        btnGuest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signInAnonymously().addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            startActivity(new Intent(MainActivity.this, FriendsActivity.class));
+                            Toast.makeText(MainActivity.this, "Logged in successfully", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(MainActivity.this, task.getException().getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
             }
         });
 
