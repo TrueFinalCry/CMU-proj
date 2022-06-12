@@ -15,6 +15,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -122,12 +123,7 @@ public class ChatRoomActivity extends AppCompatActivity {
                 FirebaseDatabase.getInstance().getReference("chatRoom/" + chatRoomUid).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        //cycles through all chatroom
-                        if (!imagePath.equals(""))
-                            uploadImage();
-                        Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), ImageToSend, chatRoomId, myUsername);
-                        snapshot.child("messages").getRef().push().setValue(myMessage);
-                        //edtMessageInput.setText("");
+                        sendMessage(snapshot);
                     }
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
@@ -234,7 +230,7 @@ public class ChatRoomActivity extends AppCompatActivity {
         });
     }
 
-    private void uploadImage() {
+    private void sendMessage(DataSnapshot snapshot) {
 
         ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("Uploading...");
@@ -250,6 +246,10 @@ public class ChatRoomActivity extends AppCompatActivity {
                             public void onComplete(@NonNull Task<Uri> task) {
                                 if(task.isSuccessful()) {
                                     ImageToSend = task.getResult().toString();
+                                    Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), ImageToSend, chatRoomId, myUsername);
+                                    snapshot.child("messages").getRef().push().setValue(myMessage);
+                                    imagePath = null;
+                                    edtMessageInput.setText("");
                                 }
                             }
                         });
@@ -268,6 +268,9 @@ public class ChatRoomActivity extends AppCompatActivity {
             });
         } else {
             progressDialog.dismiss();
+            Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), "", chatRoomId, myUsername);
+            snapshot.child("messages").getRef().push().setValue(myMessage);
+            edtMessageInput.setText("");
         }
     }
     /*

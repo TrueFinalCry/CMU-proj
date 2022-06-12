@@ -43,7 +43,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageH
     public void onBindViewHolder(@NonNull MessageHolder holder, int position) {
         holder.txtMessage.setText(messages.get(position).getContent());
         holder.txtUsername.setText(messages.get(position).getUsername());
-        Glide.with(context).load(messages.get(position).getImageContent()).placeholder(R.drawable.account_image).error(R.drawable.account_image).into(holder.imgSend);
+        if (!messages.get(position).getImageContent().equals("")) {
+            holder.imgSend.setVisibility(View.VISIBLE);
+            Glide.with(context).load(messages.get(position).getImageContent()).placeholder(R.drawable.account_image).error(R.drawable.account_image).into(holder.imgSend);
+        }
+        else {
+            holder.imgSend.setVisibility(View.GONE);
+        }
 
         ConstraintLayout constraintLayout = holder.ccll;
 
