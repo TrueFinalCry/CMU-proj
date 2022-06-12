@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -24,7 +23,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class FriendsActivity extends AppCompatActivity {
 
@@ -98,6 +96,7 @@ public class FriendsActivity extends AppCompatActivity {
                         .putExtra("room_image", chatRooms.get(position).getChatImage())
                         .putExtra("my_image", myUser.getProfilePicture())
                         .putExtra("my_username", myUser.getUsername())
+                        .putExtra("chat_room_uid", chatRooms.get(position).getUid())
 
                 );
                 Toast.makeText(FriendsActivity.this, "Selected chatroom "+ chatRooms.get(position).getChatRoomId(), Toast.LENGTH_SHORT).show();
@@ -187,7 +186,8 @@ public class FriendsActivity extends AppCompatActivity {
                             dataSnapshot.child("chatRoomId").getValue(String.class),
                             userList,
                             messageList,
-                            dataSnapshot.child("chatImage").getValue(String.class)
+                            dataSnapshot.child("chatImage").getValue(String.class),
+                            dataSnapshot.child("uid").getValue(String.class)
                     );
 
                     chatRooms.add(chatRoom);

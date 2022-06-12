@@ -1,6 +1,9 @@
 package com.example.conversationalist;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,6 +43,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageH
     public void onBindViewHolder(@NonNull MessageHolder holder, int position) {
         holder.txtMessage.setText(messages.get(position).getContent());
         holder.txtUsername.setText(messages.get(position).getUsername());
+        Glide.with(context).load(messages.get(position).getImageContent()).placeholder(R.drawable.account_image).error(R.drawable.account_image).into(holder.imgSend);
 
         ConstraintLayout constraintLayout = holder.ccll;
 
@@ -52,11 +56,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageH
 
             constraintSet.clear(R.id.profile_cardView, ConstraintSet.LEFT);
             constraintSet.clear(R.id.txt_message_content, ConstraintSet.LEFT);
-            constraintSet.clear(R.id.txt_username_content, ConstraintSet.LEFT);
+            constraintSet.clear(R.id.txt_message_content, ConstraintSet.LEFT);
+            constraintSet.clear(R.id.img_send, ConstraintSet.LEFT);
 
             constraintSet.connect(R.id.profile_cardView, ConstraintSet.RIGHT, R.id.ccLayout, ConstraintSet.RIGHT, 0);
             constraintSet.connect(R.id.txt_message_content, ConstraintSet.RIGHT, R.id.ccLayout, ConstraintSet.RIGHT, 0);
+            constraintSet.connect(R.id.img_send, ConstraintSet.RIGHT, R.id.ccLayout, ConstraintSet.RIGHT, 0);
             constraintSet.connect(R.id.txt_message_content, ConstraintSet.TOP, R.id.profile_cardView, ConstraintSet.BOTTOM, 0);
+            constraintSet.connect(R.id.img_send, ConstraintSet.TOP, R.id.txt_message_content, ConstraintSet.BOTTOM, 0);
             constraintSet.connect(R.id.txt_username_content, ConstraintSet.RIGHT, R.id.profile_cardView, ConstraintSet.LEFT, 0);
 
             constraintSet.applyTo(constraintLayout);
@@ -69,11 +76,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageH
 
             constraintSet.clear(R.id.profile_cardView, ConstraintSet.RIGHT);
             constraintSet.clear(R.id.txt_message_content, ConstraintSet.RIGHT);
+            constraintSet.clear(R.id.img_send, ConstraintSet.RIGHT);
             constraintSet.clear(R.id.txt_username_content, ConstraintSet.RIGHT);
 
             constraintSet.connect(R.id.profile_cardView, ConstraintSet.LEFT, R.id.ccLayout, ConstraintSet.LEFT, 0);
             constraintSet.connect(R.id.txt_message_content, ConstraintSet.LEFT, R.id.ccLayout, ConstraintSet.LEFT, 0);
             constraintSet.connect(R.id.txt_message_content, ConstraintSet.TOP, R.id.profile_cardView, ConstraintSet.BOTTOM, 0);
+            constraintSet.connect(R.id.img_send, ConstraintSet.LEFT, R.id.ccLayout, ConstraintSet.LEFT, 0);
+            constraintSet.connect(R.id.img_send, ConstraintSet.TOP, R.id.txt_message_content, ConstraintSet.BOTTOM, 0);
             constraintSet.connect(R.id.txt_username_content, ConstraintSet.LEFT, R.id.profile_cardView, ConstraintSet.RIGHT, 0);
             constraintSet.applyTo(constraintLayout);
         }
@@ -89,6 +99,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageH
         TextView txtMessage;
         TextView txtUsername;
         ImageView profImage;
+        ImageView imgSend;
         public MessageHolder(@NonNull View itemView) {
             super(itemView);
 
@@ -96,7 +107,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageH
             txtMessage = itemView.findViewById(R.id.txt_message_content);
             txtUsername = itemView.findViewById(R.id.txt_username_content);
             profImage = itemView.findViewById(R.id.small_profile_img);
-
+            imgSend = itemView.findViewById(R.id.img_send);
         }
     }
 }

@@ -8,18 +8,28 @@ public class ChatRoom {
     private ArrayList<String> users;
     private ArrayList<Message> messages;
     private String chatImage;
+    private String uid;
 
 
     public ChatRoom() {
 
     }
 
-    public ChatRoom(String type, String chatRoomId, ArrayList<String> usersId, ArrayList<Message> messages, String chatImage) {
+    public ChatRoom(String type, String chatRoomId, ArrayList<String> usersId, ArrayList<Message> messages, String chatImage, String uid) {
         this.type = type;
         this.chatRoomId = chatRoomId;
         this.users = usersId;
         this.messages = messages;
         this.chatImage = chatImage;
+        this.uid = uid;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 
     public String getChatImage() {

@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
@@ -15,8 +14,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -42,7 +39,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.lang.ref.Reference;
 import java.util.ArrayList;
 
 public class ChatRoomCreatorActivity extends AppCompatActivity {
@@ -151,8 +147,8 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
                                 txtChatRoomName.getText().toString(),
                                 new ArrayList<String>(),
                                 new ArrayList<Message>(),
-                                ""
-                        );
+                                "",
+                                "");
                         FirebaseDatabase.getInstance().getReference("chatRoom").push().setValue(chatRoom);
 
                         FirebaseDatabase.getInstance().getReference("chatRoom").addListenerForSingleValueEvent(new ValueEventListener() {
@@ -162,6 +158,7 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
                                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                                     String roomId = dataSnapshot.child("chatRoomId").getValue(String.class);
                                     if (txtChatRoomName.getText().toString().equals(roomId)) {
+                                        dataSnapshot.child("uid").getRef().setValue(dataSnapshot.getRef().getKey());
                                         dataSnapshot.child("users").getRef().push().setValue(FirebaseAuth.getInstance().getCurrentUser().getUid());
                                         FirebaseDatabase.getInstance().getReference("user/"+ FirebaseAuth.getInstance().getCurrentUser().getUid()).child("chatrooms").push().setValue(dataSnapshot.getKey());
                                         //FirebaseDatabase.getInstance().getReference("chatRoom/"+txtChatRoom.getText().toString()+"/users").push().setValue(myUser);
