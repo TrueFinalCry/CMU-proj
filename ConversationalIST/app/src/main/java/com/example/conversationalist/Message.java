@@ -2,6 +2,7 @@ package com.example.conversationalist;
 
 public class Message {
     private String sender,content;
+    private String imageContent;
     private String chatRoomId, senderImg;
     private String username;
     // private string reactions
@@ -9,12 +10,23 @@ public class Message {
     public Message() {
     }
 
-    public Message(String sender,String senderImg, String content, String chatRoomId, String username) {
+
+    public Message(String sender, String senderImg, String content, String imageContent, String chatRoomId, String username) {
         this.sender = sender;
         this.content = content;
+        this.imageContent = imageContent;
         this.chatRoomId = chatRoomId;
         this.senderImg = senderImg;
         this.username = username;
+    }
+
+
+    public String getImageContent() {
+        return imageContent;
+    }
+
+    public void setImageContent(String imageContent) {
+        this.imageContent = imageContent;
     }
 
     public String getUsername() {

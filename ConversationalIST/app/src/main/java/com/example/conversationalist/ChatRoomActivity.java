@@ -15,7 +15,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
@@ -74,7 +73,7 @@ public class ChatRoomActivity extends AppCompatActivity {
                         for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                             String roomId = dataSnapshot.child("chatRoomId").getValue(String.class);
                             if (roomId.equals(chatRoomId)) {
-                                Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getEmail(), myImage, edtMessageInput.getText().toString(), chatRoomId, myUsername);
+                                Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), "", chatRoomId, myUsername);
                                 dataSnapshot.child("messages").getRef().push().setValue(myMessage);
                                 //edtMessageInput.setText("");
                                 break;
@@ -91,6 +90,16 @@ public class ChatRoomActivity extends AppCompatActivity {
 
         messageAdapter = new MessageAdapter(messages, ChatRoomActivity.this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        /*
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (!recyclerView.canScrollVertically(1))
+                    onScrolledToBottom();
+            }
+        });
+        */
         recyclerView.setAdapter(messageAdapter);
         // maybe need toolbar
         Glide.with(ChatRoomActivity.this).load(chatRoomImage).placeholder(R.drawable.account_image).error(R.drawable.account_image).into(chatIcon);
@@ -125,16 +134,10 @@ public class ChatRoomActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 //cycles through all chatroom
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    String chatRoomId = dataSnapshot.child("chatRoomId").getValue(String.class);
-                    if (chatRoomId.equals(chatRoomId)) {
+                    String roomId = dataSnapshot.child("chatRoomId").getValue(String.class);
+                    if (chatRoomId.equals(roomId)) {
                         chatRoomImage = dataSnapshot.child("chatImage").getValue(String.class);
                         Glide.with(ChatRoomActivity.this).load(chatRoomImage).placeholder(R.drawable.account_image).error(R.drawable.account_image).into(chatIcon);
-                        for (DataSnapshot ds : dataSnapshot.child("users").getChildren()) {
-                            if(ds.child("email").getValue(String.class).equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
-                                myUsername = ds.child("username").getValue(String.class);
-                                break;
-                            }
-                        }
                         break;
                     }
                 }
@@ -181,4 +184,23 @@ public class ChatRoomActivity extends AppCompatActivity {
             }
         });
     }
+    /*
+    private void onScrolledToBottom() {
+        if (songMainList.size() < songAllList.size()) {
+            int x, y;
+            if ((songAllList.size() - songMainList.size()) >= 50) {
+                x = songMainList.size();
+                y = x + 50;
+            } else {
+                x = songMainList.size();
+                y = x + songAllList.size() - songMainList.size();
+            }
+            for (int i = x; i < y; i++) {
+                songMainList.add(songAllList.get(i));
+            }
+            songsAdapter.notifyDataSetChanged();
+        }
+
+    }
+    */
 }

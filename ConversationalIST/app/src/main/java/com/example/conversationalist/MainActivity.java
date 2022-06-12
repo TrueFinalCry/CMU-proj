@@ -15,7 +15,10 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -87,9 +90,29 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
-                    FirebaseDatabase.getInstance().getReference("user/"+ FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(new User(edtUsername.getText().toString(), edtEmail.getText().toString(), ""));
-                    startActivity(new Intent(MainActivity.this, FriendsActivity.class));
-                    Toast.makeText(MainActivity.this, "Signed up successfully", Toast.LENGTH_SHORT).show();
+                    FirebaseDatabase.getInstance().getReference("user").addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            //cycles through all users (maybe we need chatrooms instead)
+                            boolean i = true;
+                            for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                                String username = dataSnapshot.child("username").getValue(String.class);
+                                if (edtUsername.getText().toString().equals(username)) {
+                                    i = false;
+                                    Toast.makeText(MainActivity.this, "Username already in use", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                            if (i) {
+                                FirebaseDatabase.getInstance().getReference("user/"+ FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(new User(edtUsername.getText().toString(), edtEmail.getText().toString(), ""));
+                                startActivity(new Intent(MainActivity.this, FriendsActivity.class));
+                                Toast.makeText(MainActivity.this, "Signed up successfully", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                        @Override
+                        public void onCancelled (@NonNull DatabaseError error){
+
+                        }
+                    });
                 } else {
                     Toast.makeText(MainActivity.this, task.getException().getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                 }

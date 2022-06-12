@@ -44,7 +44,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageH
         ConstraintLayout constraintLayout = holder.ccll;
 
         // if the message is ours, put on the right from the left
-        if(messages.get(position).getSender().equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
+        if(messages.get(position).getSender().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
             // USER
             Glide.with(context).load(messages.get(position).getSenderImg()).error(R.drawable.account_image).placeholder(R.drawable.account_image).into(holder.profImage);
             ConstraintSet constraintSet = new ConstraintSet();

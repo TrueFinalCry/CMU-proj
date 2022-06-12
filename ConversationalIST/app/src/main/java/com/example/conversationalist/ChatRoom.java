@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class ChatRoom {
     private String type;
     private String chatRoomId;
-    private ArrayList<User> users;
+    private ArrayList<String> users;
     private ArrayList<Message> messages;
     private String chatImage;
 
@@ -14,7 +14,7 @@ public class ChatRoom {
 
     }
 
-    public ChatRoom(String type, String chatRoomId, ArrayList<User> usersId, ArrayList<Message> messages, String chatImage) {
+    public ChatRoom(String type, String chatRoomId, ArrayList<String> usersId, ArrayList<Message> messages, String chatImage) {
         this.type = type;
         this.chatRoomId = chatRoomId;
         this.users = usersId;
@@ -46,11 +46,11 @@ public class ChatRoom {
         this.chatRoomId = chatRoomId;
     }
 
-    public ArrayList<User> getUsers() {
+    public ArrayList<String> getUsers() {
         return users;
     }
 
-    public void setUsers(ArrayList<User> usersId) {
+    public void setUsers(ArrayList<String> usersId) {
         this.users = usersId;
     }
 

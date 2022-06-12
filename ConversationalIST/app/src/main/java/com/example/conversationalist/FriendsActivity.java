@@ -30,7 +30,7 @@ public class FriendsActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private User myUser;
-    private ArrayList<User> users;
+    private ArrayList<String> users;
     private ArrayList<ChatRoom> chatRooms;
     private ChatRoomAdapter chatRoomAdapter;
     ChatRoomAdapter.OnChatRoomClickListener onChatRoomClickListener;
@@ -64,14 +64,9 @@ public class FriendsActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 //cycles through all users (maybe we need chatrooms instead)
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    users.add(dataSnapshot.getValue(User.class));
-                }
-
-                for(User user : users) {
-                    if(user.getEmail().equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
-                        myUser = new User(user.getUsername(), user.getEmail(), user.getProfilePicture());
-                        // maybe remove myself from list
-                        return;
+                    users.add(dataSnapshot.getKey());
+                    if (dataSnapshot.getKey().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+                        myUser = new User(dataSnapshot.child("username").getValue(String.class), dataSnapshot.child("email").getValue(String.class), dataSnapshot.child("profilePicture").getValue(String.class));
                     }
                 }
             }
@@ -115,60 +110,10 @@ public class FriendsActivity extends AppCompatActivity {
         addChatRoom.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FirebaseDatabase.getInstance().getReference("chatRoom").addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        //cycles through all users (maybe we need chatrooms instead)
-                        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                            String roomId = dataSnapshot.child("chatRoomId").getValue(String.class);
-                            if (txtChatRoom.getText().toString().equals(roomId)) {
-                                for(DataSnapshot ds : dataSnapshot.child("users").getChildren()) {
-                                    String email = ds.child("email").getValue(String.class);
-                                    if(myUser.getEmail().equals(email)) {
-                                        Toast.makeText(FriendsActivity.this, "Already Registered in this ChatRoom", Toast.LENGTH_SHORT).show();
-                                        return;
-                                    }
-                                }
-                                Toast.makeText(FriendsActivity.this, "Successfully Registered in this ChatRoom", Toast.LENGTH_SHORT).show();
-                                dataSnapshot.child("users").getRef().push().setValue(myUser);
-                                return;
-                            }
-                        }
-
-                        ChatRoom chatRoom = new ChatRoom(
-                                "public",
-                                txtChatRoom.getText().toString(),
-                                new ArrayList<User>(),
-                                new ArrayList<Message>(),
-                                ""
-                        );
-                        FirebaseDatabase.getInstance().getReference("chatRoom").push().setValue(chatRoom);
-
-                        FirebaseDatabase.getInstance().getReference("chatRoom").addListenerForSingleValueEvent(new ValueEventListener() {
-                           @Override
-                           public void onDataChange(@NonNull DataSnapshot snapshot) {
-                               //cycles through all users (maybe we need chatrooms instead)
-                               for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                                   String roomId = dataSnapshot.child("chatRoomId").getValue(String.class);
-                                   if (txtChatRoom.getText().toString().equals(roomId)) {
-                                       dataSnapshot.child("users").getRef().push().setValue(myUser);
-                                       //FirebaseDatabase.getInstance().getReference("chatRoom/"+txtChatRoom.getText().toString()+"/users").push().setValue(myUser);
-                                   }
-                               }
-                           }
-                           @Override
-                           public void onCancelled (@NonNull DatabaseError error){
-
-                           }
-                        });
-                        Toast.makeText(FriendsActivity.this, "Successfully created ChatRoom", Toast.LENGTH_SHORT).show();
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
+                startActivity(new Intent(FriendsActivity.this,ChatRoomCreatorActivity.class)
+                        .putExtra("my_image", myUser.getProfilePicture())
+                        .putExtra("my_username", myUser.getUsername())
+                );
                 //txtChatRoom.setText("");
             }
         });
@@ -216,11 +161,22 @@ public class FriendsActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 //cycles through all users (maybe we need chatrooms instead)
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    ArrayList<User> userList = new ArrayList<>();
+
+
+
+                    ArrayList<String> userList = new ArrayList<>();
                     ArrayList<Message> messageList = new ArrayList<>();
 
+                    boolean in = false;
+
                     for (DataSnapshot ds : dataSnapshot.child("users").getChildren()) {
-                        userList.add(ds.getValue(User.class));
+                        if (ds.getValue(String.class).equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+                            in = true;
+                        }
+                        userList.add(ds.getValue(String.class));
+                    }
+                    if (!in) {
+                        continue;
                     }
                     for (DataSnapshot ds : dataSnapshot.child("messages").getChildren()) {
                         messageList.add(ds.getValue(Message.class));
@@ -234,12 +190,8 @@ public class FriendsActivity extends AppCompatActivity {
                             dataSnapshot.child("chatImage").getValue(String.class)
                     );
 
-                    for (User user : chatRoom.getUsers()) {
-                        if(user.getEmail().equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
-                            chatRooms.add(chatRoom);
-                            break;
-                        }
-                    }
+                    chatRooms.add(chatRoom);
+
                 }
                 chatRoomAdapter = new ChatRoomAdapter(chatRooms, FriendsActivity.this, onChatRoomClickListener);
                 recyclerView.setLayoutManager(new LinearLayoutManager(FriendsActivity.this));

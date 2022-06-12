@@ -153,14 +153,6 @@ public class ChatRoomEditorActivity extends AppCompatActivity {
                     String roomId = dataSnapshot.child("chatRoomId").getValue(String.class);
                     if (chatRoomId.equals(roomId)) {
                         dataSnapshot.child("chatImage").getRef().setValue(url);
-                        for (DataSnapshot ds : dataSnapshot.child("users").getChildren()) {
-                            if(ds.child("email").getValue(String.class).equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
-                                if(!username.equals("")) {
-                                    ds.child("username").getRef().setValue(username);
-                                }
-                                break;
-                            }
-                        }
                         break;
                     }
 
