@@ -9,9 +9,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -88,7 +92,8 @@ public class FriendsActivity extends AppCompatActivity {
             @Override
             public void onRefresh() {
                 //getUsers();
-                getChatRooms();
+                if (isConnected())
+                    getChatRooms();
                 swipeRefreshLayout.setRefreshing(false);
             }
 
@@ -124,8 +129,8 @@ public class FriendsActivity extends AppCompatActivity {
         });
 
         handleIntent(getIntent());
-
-        getChatRooms();
+        if (isConnected())
+            getChatRooms();
         // ATTENTION: This was auto-generated to handle app links.
 
     }
@@ -150,17 +155,20 @@ public class FriendsActivity extends AppCompatActivity {
     @Override
     protected void onRestart() {
         super.onRestart();
-        FirebaseDatabase.getInstance().getReference("user/"+ FirebaseAuth.getInstance().getCurrentUser().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                //cycles through all chatroom
-                myUser.setProfilePicture(snapshot.child("profilePicture").getValue().toString());
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-            }
-        });
-        getChatRooms();
+        if (isConnected()) {
+            FirebaseDatabase.getInstance().getReference("user/" + FirebaseAuth.getInstance().getCurrentUser().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    //cycles through all chatroom
+                    myUser.setProfilePicture(snapshot.child("profilePicture").getValue().toString());
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                }
+            });
+            getChatRooms();
+        }
     }
 
     private void getChatRooms() {
@@ -237,5 +245,18 @@ public class FriendsActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    public boolean isConnected() {
+        boolean connected = false;
+        try {
+            ConnectivityManager cm = (ConnectivityManager)getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo nInfo = cm.getActiveNetworkInfo();
+            connected = nInfo != null && nInfo.isAvailable() && nInfo.isConnected();
+            return connected;
+        } catch (Exception e) {
+            Log.e("Connectivity Exception", e.getMessage());
+        }
+        return connected;
     }
 }

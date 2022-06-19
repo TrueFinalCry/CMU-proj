@@ -16,6 +16,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -176,16 +178,6 @@ public class ChatRoomActivity extends AppCompatActivity {
 
         messageAdapter = new MessageAdapter(messages, ChatRoomActivity.this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        /*
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                if (!recyclerView.canScrollVertically(1))
-                    onScrolledToBottom();
-            }
-        });
-        */
         recyclerView.setAdapter(messageAdapter);
         // maybe need toolbar
         Glide.with(ChatRoomActivity.this).load(chatRoomImage).placeholder(R.drawable.account_image).error(R.drawable.account_image).into(chatIcon);
@@ -212,36 +204,39 @@ public class ChatRoomActivity extends AppCompatActivity {
     }
 
     private void attachMessageListener(String chatRoomId) {
-        FirebaseDatabase.getInstance().getReference("chatRoom/" + chatRoomUid).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-            //cycles through all chatroom
-            snapshot.child("messages").getRef().addValueEventListener(new ValueEventListener() {
-                    @SuppressLint("NotifyDataSetChanged")
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        messages.clear();
-                        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                            messages.add(dataSnapshot.getValue(Message.class));
+        if (isConnected()) {
+            FirebaseDatabase.getInstance().getReference("chatRoom/" + chatRoomUid).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    //cycles through all chatroom
+                    snapshot.child("messages").getRef().addValueEventListener(new ValueEventListener() {
+                        @SuppressLint("NotifyDataSetChanged")
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            messages.clear();
+                            for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                                messages.add(dataSnapshot.getValue(Message.class));
+                            }
+                            messageAdapter.notifyDataSetChanged();
+                            recyclerView.scrollToPosition(messages.size()-1);
+                            recyclerView.setVisibility(View.VISIBLE);
+                            progressBar.setVisibility(View.GONE);
                         }
-                        messageAdapter.notifyDataSetChanged();
-                        recyclerView.scrollToPosition(messages.size()-1);
-                        recyclerView.setVisibility(View.VISIBLE);
-                        progressBar.setVisibility(View.GONE);
-                    }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
 
-                    }
-                });
-            }
+                        }
+                    });
+                }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-            }
-        });
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                }
+            });
+        }
     }
+
 
     private void sendMessage(DataSnapshot snapshot) {
 
@@ -353,18 +348,16 @@ public class ChatRoomActivity extends AppCompatActivity {
             }
         }
     }
-
-    public long downloadFile(Context context, String fileName, String fileExtension, String destinationDirectory, String url) {
-
-
-        DownloadManager downloadmanager = (DownloadManager) context.
-                getSystemService(Context.DOWNLOAD_SERVICE);
-        Uri uri = Uri.parse(url);
-        DownloadManager.Request request = new DownloadManager.Request(uri);
-
-        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-        request.setDestinationInExternalFilesDir(context, destinationDirectory, fileName + fileExtension);
-
-        return downloadmanager.enqueue(request);
+    public boolean isConnected() {
+        boolean connected = false;
+        try {
+            ConnectivityManager cm = (ConnectivityManager)getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo nInfo = cm.getActiveNetworkInfo();
+            connected = nInfo != null && nInfo.isAvailable() && nInfo.isConnected();
+            return connected;
+        } catch (Exception e) {
+            Log.e("Connectivity Exception", e.getMessage());
+        }
+        return connected;
     }
 }
