@@ -78,6 +78,22 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
+        android:id="@+id/share_link"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/share_room_link"
+        app:layout_constraintBottom_toTopOf="@+id/imgSendPhotos"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/share_file"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/share_file"
+        app:layout_constraintBottom_toTopOf="@+id/share_link"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
         android:id="@+id/imgSendMessage"
         android:layout_width="40dp"
         android:layout_height="40dp"

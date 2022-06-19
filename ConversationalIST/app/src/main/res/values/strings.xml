@@ -14,4 +14,10 @@
     <string name="light_dark_mode">Light/Dark Mode</string>
     <string name="light_mode">Light Mode</string>
     <string name="dark_mode">Dark Mode</string>
+    <string name="location">location</string>
+    <string name="chatroomname">ChatRoomName</string>
+    <string name="radius">radius</string>
+    <string name="publicroom">PublicRoom</string>
+    <string name="privateroom">PrivateRoom</string>
+    <string name="file">File</string>
 </resources>

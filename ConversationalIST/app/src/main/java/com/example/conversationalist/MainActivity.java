@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -25,6 +26,9 @@ public class MainActivity extends AppCompatActivity {
     private EditText edtUsername, edtPassword, edtEmail;
     private Button btnSubmit, btnGuest;
     private TextView txtLoginInfo;
+    private Intent appLinkIntent;
+    private String appLinkAction;
+    private Uri appLinkData;
 
     private boolean isSigningUp = true;
 
@@ -42,16 +46,21 @@ public class MainActivity extends AppCompatActivity {
 
         txtLoginInfo = findViewById(R.id.txtLoginInfo);
 
-        if (FirebaseAuth.getInstance().getCurrentUser() != null)  {
-            startActivity(new Intent(MainActivity.this, FriendsActivity.class));
+        appLinkIntent = getIntent();
+        appLinkAction = appLinkIntent.getAction();
+        appLinkData = appLinkIntent.getData();
+
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            startActivity(new Intent(MainActivity.this, FriendsActivity.class)
+            );
             finish();
         }
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                if(edtEmail.getText().toString().isEmpty() || edtPassword.getText().toString().isEmpty()) {
-                    if(isSigningUp && edtUsername.getText().toString().isEmpty()) {
+                if (edtEmail.getText().toString().isEmpty() || edtPassword.getText().toString().isEmpty()) {
+                    if (isSigningUp && edtUsername.getText().toString().isEmpty()) {
                         Toast.makeText(MainActivity.this, "Invalid input", Toast.LENGTH_SHORT).show();
                         return;
                     }
@@ -60,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
                 }
 
-                if(isSigningUp) {
+                if (isSigningUp) {
                     handleSignUp();
                 } else {
                     handleLogin();
@@ -122,7 +131,8 @@ public class MainActivity extends AppCompatActivity {
                             }
                             if (i) {
                                 FirebaseDatabase.getInstance().getReference("user/"+ FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(new User(edtUsername.getText().toString(), edtEmail.getText().toString(), ""));
-                                startActivity(new Intent(MainActivity.this, FriendsActivity.class));
+                                startActivity(new Intent(MainActivity.this, FriendsActivity.class)
+                                );
                                 Toast.makeText(MainActivity.this, "Signed up successfully", Toast.LENGTH_SHORT).show();
                             }
                         }
@@ -143,7 +153,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if(task.isSuccessful()) {
-                    startActivity(new Intent(MainActivity.this, FriendsActivity.class));
+                    startActivity(new Intent(MainActivity.this, FriendsActivity.class)
+                    );
                     Toast.makeText(MainActivity.this, "Logged in successfully", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(MainActivity.this, task.getException().getLocalizedMessage(), Toast.LENGTH_SHORT).show();

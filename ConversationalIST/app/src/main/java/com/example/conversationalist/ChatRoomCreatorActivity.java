@@ -176,7 +176,7 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
                                                 new ArrayList<Message>(),
                                                 "",
                                                 dataSnapshot.getRef().getKey());
-                                        FirebaseDatabase.getInstance().getReference("chatRoom").push().setValue(chatRoom);
+                                        FirebaseDatabase.getInstance().getReference("chatRoom/" + dataSnapshot.getRef().getKey() + "/uid").setValue(dataSnapshot.getRef().getKey());
                                         FirebaseDatabase.getInstance().getReference("user/"+ FirebaseAuth.getInstance().getCurrentUser().getUid()).child("chatrooms").push().setValue(chatRoom);
                                         //FirebaseDatabase.getInstance().getReference("chatRoom/"+txtChatRoom.getText().toString()+"/users").push().setValue(myUser);
                                         return;
@@ -270,12 +270,10 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
     }
 
     private void getCurrentLocation() {
-
-
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ActivityCompat.checkSelfPermission(ChatRoomCreatorActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 if (isGPSEnabled()) {
+                    Log.d("TAG1", "A");
                     LocationServices.getFusedLocationProviderClient(ChatRoomCreatorActivity.this)
                             .requestLocationUpdates(locationRequest, new LocationCallback() {
                                 @Override

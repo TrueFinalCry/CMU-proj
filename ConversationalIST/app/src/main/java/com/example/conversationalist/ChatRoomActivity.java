@@ -1,5 +1,7 @@
 package com.example.conversationalist;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -9,7 +11,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.DownloadManager;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -47,9 +51,10 @@ public class ChatRoomActivity extends AppCompatActivity {
     private EditText edtMessageInput;
     private TextView txtChattingWith;
     private ProgressBar progressBar;
-    private ImageView chatIcon,imgSend,imgSendPhotos;
+    private ImageView chatIcon,imgSend,imgSendPhotos, shareRoomLink,shareFile;
     private Uri imagePath;
-    private String ImageToSend;
+    private Uri filePath;
+    private String ImageToSend, fileToSend;
 
     private ArrayList<Message> messages;
 
@@ -72,6 +77,8 @@ public class ChatRoomActivity extends AppCompatActivity {
         myUsername = getIntent().getStringExtra("my_username");
         chatRoomUid = getIntent().getStringExtra("chat_room_uid");
 
+        shareFile = findViewById(R.id.share_file);
+        shareRoomLink = findViewById(R.id.share_link);
         recyclerView = findViewById(R.id.recyclerMessages);
         imgSend = findViewById(R.id.imgSendMessage);
         edtMessageInput = findViewById(R.id.edtText);
@@ -84,13 +91,47 @@ public class ChatRoomActivity extends AppCompatActivity {
         messages = new ArrayList<>();
         ImageToSend = "";
 
+        shareRoomLink.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String linkInfo = "http://conversationalist-3003c-default-rtdb.firebaseio.com/chatRoom/" + chatRoomUid;
+                String toSend = edtMessageInput.getText().toString() + linkInfo;
+                edtMessageInput.setText(toSend);
+            }
+        });
+
+        shareFile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("*/*");
+
+                FileActivityResultLauncher.launch(intent);
+            }
+
+            ActivityResultLauncher<Intent> FileActivityResultLauncher = registerForActivityResult(
+                    new ActivityResultContracts.StartActivityForResult(),
+                    new ActivityResultCallback<ActivityResult>() {
+                        @Override
+                        public void onActivityResult(ActivityResult result) {
+                            if (result.getResultCode() == Activity.RESULT_OK) {
+                                // Here, no request code
+                                Intent data = result.getData();
+                                if (data != null && data.getData() != null) {
+                                    filePath = data.getData();
+                                }
+                            }
+                        }
+                    });
+        });
 
         imgSendPhotos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 Intent photoIntent = new Intent(Intent.ACTION_PICK);
-                //photoIntent.setAction(Intent.ACTION_GET_CONTENT);
+                photoIntent.setAction(Intent.ACTION_GET_CONTENT);
                 photoIntent.setType("image/*");
                 LaunchImageChooserActivity.launch(photoIntent);
             }
@@ -170,30 +211,6 @@ public class ChatRoomActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-
-        FirebaseDatabase.getInstance().getReference("chatRoom").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                //cycles through all chatroom
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    String roomId = dataSnapshot.child("chatRoomId").getValue(String.class);
-                    if (chatRoomId.equals(roomId)) {
-                        chatRoomImage = dataSnapshot.child("chatImage").getValue(String.class);
-                        Glide.with(ChatRoomActivity.this).load(chatRoomImage).placeholder(R.drawable.account_image).error(R.drawable.account_image).into(chatIcon);
-                        break;
-                    }
-                }
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-            }
-        });
-
-    }
-
     private void attachMessageListener(String chatRoomId) {
         FirebaseDatabase.getInstance().getReference("chatRoom/" + chatRoomUid).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -242,10 +259,44 @@ public class ChatRoomActivity extends AppCompatActivity {
                             public void onComplete(@NonNull Task<Uri> task) {
                                 if(task.isSuccessful()) {
                                     ImageToSend = task.getResult().toString();
-                                    Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), ImageToSend, chatRoomId, myUsername);
-                                    snapshot.child("messages").getRef().push().setValue(myMessage);
-                                    imagePath = null;
-                                    edtMessageInput.setText("");
+                                    if (filePath != null) {
+                                        FirebaseStorage.getInstance().getReference("files/" + UUID.randomUUID().toString()).putFile(filePath).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                                                if (task.isSuccessful()) {
+                                                    task.getResult().getStorage().getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<Uri> task) {
+                                                            if (task.isSuccessful()) {
+                                                                fileToSend = task.getResult().toString();
+                                                                Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), ImageToSend, chatRoomId, myUsername, fileToSend);
+                                                                snapshot.child("messages").getRef().push().setValue(myMessage);
+                                                                filePath = null;
+                                                                imagePath = null;
+                                                                edtMessageInput.setText("");
+                                                            }
+                                                        }
+                                                    });
+                                                    Toast.makeText(ChatRoomActivity.this, "Uploaded successfully", Toast.LENGTH_SHORT).show();
+                                                } else {
+                                                    Toast.makeText(ChatRoomActivity.this, task.getException().getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                                                }
+                                                progressDialog.dismiss();
+                                            }
+                                        }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                                            @Override
+                                            public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
+                                                double progress = 100.0 * snapshot.getBytesTransferred() / snapshot.getTotalByteCount();
+                                                progressDialog.setMessage(" Uploaded " + (int) progress + "%");
+                                            }
+                                        });
+                                    }
+                                    else {
+                                        Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), ImageToSend, chatRoomId, myUsername, "");
+                                        snapshot.child("messages").getRef().push().setValue(myMessage);
+                                        imagePath = null;
+                                        edtMessageInput.setText("");
+                                    }
                                 }
                             }
                         });
@@ -263,29 +314,57 @@ public class ChatRoomActivity extends AppCompatActivity {
                 }
             });
         } else {
-            progressDialog.dismiss();
-            Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), "", chatRoomId, myUsername);
-            snapshot.child("messages").getRef().push().setValue(myMessage);
-            edtMessageInput.setText("");
+            if (filePath != null) {
+                FirebaseStorage.getInstance().getReference("files/" + UUID.randomUUID().toString()).putFile(filePath).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            task.getResult().getStorage().getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Uri> task) {
+                                    if (task.isSuccessful()) {
+                                        String fileToSend = task.getResult().toString();
+                                        Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), "", chatRoomId, myUsername, fileToSend);
+                                        snapshot.child("messages").getRef().push().setValue(myMessage);
+                                        filePath = null;
+                                        edtMessageInput.setText("");
+                                    }
+                                }
+                            });
+                            Toast.makeText(ChatRoomActivity.this, "Uploaded successfully", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(ChatRoomActivity.this, task.getException().getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                        progressDialog.dismiss();
+                    }
+                }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
+                        double progress = 100.0 * snapshot.getBytesTransferred() / snapshot.getTotalByteCount();
+                        progressDialog.setMessage(" Uploaded " + (int) progress + "%");
+                    }
+                });
+            }
+            else {
+                progressDialog.dismiss();
+                Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), "", chatRoomId, myUsername, "");
+                snapshot.child("messages").getRef().push().setValue(myMessage);
+                edtMessageInput.setText("");
+            }
         }
     }
-    /*
-    private void onScrolledToBottom() {
-        if (songMainList.size() < songAllList.size()) {
-            int x, y;
-            if ((songAllList.size() - songMainList.size()) >= 50) {
-                x = songMainList.size();
-                y = x + 50;
-            } else {
-                x = songMainList.size();
-                y = x + songAllList.size() - songMainList.size();
-            }
-            for (int i = x; i < y; i++) {
-                songMainList.add(songAllList.get(i));
-            }
-            songsAdapter.notifyDataSetChanged();
-        }
 
+    public long downloadFile(Context context, String fileName, String fileExtension, String destinationDirectory, String url) {
+
+
+        DownloadManager downloadmanager = (DownloadManager) context.
+                getSystemService(Context.DOWNLOAD_SERVICE);
+        Uri uri = Uri.parse(url);
+        DownloadManager.Request request = new DownloadManager.Request(uri);
+
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        request.setDestinationInExternalFilesDir(context, destinationDirectory, fileName + fileExtension);
+
+        return downloadmanager.enqueue(request);
     }
-    */
 }

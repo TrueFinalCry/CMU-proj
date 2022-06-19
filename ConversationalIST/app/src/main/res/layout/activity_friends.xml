@@ -37,7 +37,7 @@
             android:layout_height="wrap_content"
             android:maxHeight="100dp"
             android:minHeight="45dp"
-            android:visibility="visible"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/imgAddRoom"
             app:layout_constraintStart_toStartOf="parent" />

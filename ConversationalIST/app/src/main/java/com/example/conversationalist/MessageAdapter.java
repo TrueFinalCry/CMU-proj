@@ -1,8 +1,10 @@
 package com.example.conversationalist;
 
+import android.app.DownloadManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.recyclerview.widget.RecyclerView;
@@ -51,6 +54,16 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageH
             holder.imgSend.setVisibility(View.GONE);
         }
 
+        if (!messages.get(position).getFile().equals("")) {
+            holder.fileImg.setVisibility(View.VISIBLE);
+            holder.fileName.setVisibility(View.VISIBLE);
+            holder.fileName.setText(messages.get(position).getFile());
+        }
+        else {
+            holder.fileImg.setVisibility(View.GONE);
+            holder.fileName.setVisibility(View.GONE);
+        }
+
         ConstraintLayout constraintLayout = holder.ccll;
 
         // if the message is ours, put on the right from the left
@@ -65,12 +78,28 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageH
             constraintSet.clear(R.id.txt_message_content, ConstraintSet.LEFT);
             constraintSet.clear(R.id.img_send, ConstraintSet.LEFT);
 
+            constraintSet.clear(R.id.small_file_img, ConstraintSet.LEFT);
+            constraintSet.clear(R.id.file_name, ConstraintSet.LEFT);
+
             constraintSet.connect(R.id.profile_cardView, ConstraintSet.RIGHT, R.id.ccLayout, ConstraintSet.RIGHT, 0);
             constraintSet.connect(R.id.txt_message_content, ConstraintSet.RIGHT, R.id.ccLayout, ConstraintSet.RIGHT, 0);
             constraintSet.connect(R.id.img_send, ConstraintSet.RIGHT, R.id.ccLayout, ConstraintSet.RIGHT, 0);
             constraintSet.connect(R.id.txt_message_content, ConstraintSet.TOP, R.id.profile_cardView, ConstraintSet.BOTTOM, 0);
             constraintSet.connect(R.id.img_send, ConstraintSet.TOP, R.id.txt_message_content, ConstraintSet.BOTTOM, 0);
             constraintSet.connect(R.id.txt_username_content, ConstraintSet.RIGHT, R.id.profile_cardView, ConstraintSet.LEFT, 0);
+
+            if (!messages.get(position).getImageContent().equals("")) {
+                constraintSet.connect(R.id.file_name, ConstraintSet.RIGHT, R.id.ccLayout, ConstraintSet.RIGHT, 0);
+                constraintSet.connect(R.id.small_file_img, ConstraintSet.RIGHT, R.id.ccLayout, ConstraintSet.RIGHT, 0);
+                constraintSet.connect(R.id.file_name, ConstraintSet.TOP, R.id.img_send, ConstraintSet.BOTTOM, 0);
+                constraintSet.connect(R.id.small_file_img, ConstraintSet.TOP, R.id.file_name, ConstraintSet.BOTTOM, 0);
+            }
+            else {
+                constraintSet.connect(R.id.file_name, ConstraintSet.RIGHT, R.id.ccLayout, ConstraintSet.RIGHT, 0);
+                constraintSet.connect(R.id.small_file_img, ConstraintSet.RIGHT, R.id.ccLayout, ConstraintSet.RIGHT, 0);
+                constraintSet.connect(R.id.file_name, ConstraintSet.TOP, R.id.img_send, ConstraintSet.BOTTOM, 0);
+                constraintSet.connect(R.id.small_file_img, ConstraintSet.TOP, R.id.file_name, ConstraintSet.BOTTOM, 0);
+            }
 
             constraintSet.applyTo(constraintLayout);
 
@@ -85,12 +114,29 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageH
             constraintSet.clear(R.id.img_send, ConstraintSet.RIGHT);
             constraintSet.clear(R.id.txt_username_content, ConstraintSet.RIGHT);
 
+            constraintSet.clear(R.id.small_file_img, ConstraintSet.RIGHT);
+            constraintSet.clear(R.id.file_name, ConstraintSet.RIGHT);
+
             constraintSet.connect(R.id.profile_cardView, ConstraintSet.LEFT, R.id.ccLayout, ConstraintSet.LEFT, 0);
             constraintSet.connect(R.id.txt_message_content, ConstraintSet.LEFT, R.id.ccLayout, ConstraintSet.LEFT, 0);
             constraintSet.connect(R.id.txt_message_content, ConstraintSet.TOP, R.id.profile_cardView, ConstraintSet.BOTTOM, 0);
             constraintSet.connect(R.id.img_send, ConstraintSet.LEFT, R.id.ccLayout, ConstraintSet.LEFT, 0);
             constraintSet.connect(R.id.img_send, ConstraintSet.TOP, R.id.txt_message_content, ConstraintSet.BOTTOM, 0);
             constraintSet.connect(R.id.txt_username_content, ConstraintSet.LEFT, R.id.profile_cardView, ConstraintSet.RIGHT, 0);
+
+            if (!messages.get(position).getImageContent().equals("")) {
+                constraintSet.connect(R.id.file_name, ConstraintSet.LEFT, R.id.ccLayout, ConstraintSet.LEFT, 0);
+                constraintSet.connect(R.id.small_file_img, ConstraintSet.LEFT, R.id.ccLayout, ConstraintSet.LEFT, 0);
+                constraintSet.connect(R.id.file_name, ConstraintSet.TOP, R.id.img_send, ConstraintSet.BOTTOM, 0);
+                constraintSet.connect(R.id.small_file_img, ConstraintSet.TOP, R.id.file_name, ConstraintSet.BOTTOM, 0);
+            }
+            else {
+                constraintSet.connect(R.id.file_name, ConstraintSet.LEFT, R.id.ccLayout, ConstraintSet.LEFT, 0);
+                constraintSet.connect(R.id.small_file_img, ConstraintSet.LEFT, R.id.ccLayout, ConstraintSet.LEFT, 0);
+                constraintSet.connect(R.id.file_name, ConstraintSet.TOP, R.id.img_send, ConstraintSet.BOTTOM, 0);
+                constraintSet.connect(R.id.small_file_img, ConstraintSet.TOP, R.id.file_name, ConstraintSet.BOTTOM, 0);
+            }
+
             constraintSet.applyTo(constraintLayout);
         }
     }
@@ -106,6 +152,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageH
         TextView txtUsername;
         ImageView profImage;
         ImageView imgSend;
+        TextView fileName;
+        ImageView fileImg;
         public MessageHolder(@NonNull View itemView) {
             super(itemView);
 
@@ -114,6 +162,32 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageH
             txtUsername = itemView.findViewById(R.id.txt_username_content);
             profImage = itemView.findViewById(R.id.small_profile_img);
             imgSend = itemView.findViewById(R.id.img_send);
+            fileImg = itemView.findViewById(R.id.small_file_img);
+            fileName = itemView.findViewById(R.id.file_name);
+
+            fileImg.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String url = fileName.getText().toString();
+
+                    downloadFile(context, fileName.getText().toString(), "", "" , url);
+                }
+            });
+
+
         }
+    }
+    public long downloadFile(Context context, String fileName, String fileExtension, String destinationDirectory, String url) {
+
+
+        DownloadManager downloadmanager = (DownloadManager) context.
+                getSystemService(Context.DOWNLOAD_SERVICE);
+        Uri uri = Uri.parse(url);
+        DownloadManager.Request request = new DownloadManager.Request(uri);
+
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        request.setDestinationInExternalFilesDir(context, destinationDirectory, fileName + fileExtension);
+
+        return downloadmanager.enqueue(request);
     }
 }

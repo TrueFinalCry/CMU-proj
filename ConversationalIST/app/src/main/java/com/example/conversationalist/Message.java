@@ -5,21 +5,30 @@ public class Message {
     private String imageContent;
     private String chatRoomId, senderImg;
     private String username;
+    private String file;
     // private string reactions
 
     public Message() {
     }
 
 
-    public Message(String sender, String senderImg, String content, String imageContent, String chatRoomId, String username) {
+    public Message(String sender, String senderImg, String content, String imageContent, String chatRoomId, String username, String file) {
         this.sender = sender;
         this.content = content;
         this.imageContent = imageContent;
+        this.file = file;
         this.chatRoomId = chatRoomId;
         this.senderImg = senderImg;
         this.username = username;
     }
 
+    public String getFile() {
+        return file;
+    }
+
+    public void setFile(String file) {
+        this.file = file;
+    }
 
     public String getImageContent() {
         return imageContent;

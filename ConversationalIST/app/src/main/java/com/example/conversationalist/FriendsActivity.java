@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -41,6 +42,9 @@ public class FriendsActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private UsersAdapter usersAdapter;
     UsersAdapter.OnUserClickListener onUserClickListener;
+
+    private String appLinkAction;
+    private Uri appLinkData;
 
     private SwipeRefreshLayout swipeRefreshLayout;
 
@@ -103,17 +107,15 @@ public class FriendsActivity extends AppCompatActivity {
                         .putExtra("chat_room_uid", chatRooms.get(position).getUid())
 
                 );
-                Toast.makeText(FriendsActivity.this, "Selected chatroom "+ chatRooms.get(position).getChatRoomId(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(FriendsActivity.this, "Selected chatroom " + chatRooms.get(position).getChatRoomId(), Toast.LENGTH_SHORT).show();
             }
         };
-
-
 
 
         addChatRoom.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(FriendsActivity.this,ChatRoomCreatorActivity.class)
+                startActivity(new Intent(FriendsActivity.this, ChatRoomCreatorActivity.class)
                         .putExtra("my_image", myUser.getProfilePicture())
                         .putExtra("my_username", myUser.getUsername())
                 );
@@ -121,7 +123,11 @@ public class FriendsActivity extends AppCompatActivity {
             }
         });
 
+        handleIntent(getIntent());
+
         getChatRooms();
+        // ATTENTION: This was auto-generated to handle app links.
+
     }
 
     @Override
@@ -187,7 +193,7 @@ public class FriendsActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
                 recyclerView.setVisibility(View.VISIBLE);
                 addChatRoom.setVisibility(View.VISIBLE);
-                txtChatRoom.setVisibility(View.VISIBLE);
+                txtChatRoom.setVisibility(View.GONE);
 
             }
 
@@ -196,5 +202,40 @@ public class FriendsActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void handleIntent(Intent intent) {
+        String appLinkAction = intent.getAction();
+        Uri appLinkData = intent.getData();
+        if (Intent.ACTION_VIEW.equals(appLinkAction) && appLinkData != null){
+            String chatRoomUid = appLinkData.getLastPathSegment();
+            FirebaseDatabase.getInstance().getReference("chatRoom/" +chatRoomUid ).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    //cycles through all users (maybe we need chatrooms instead
+                    ChatRoom chatRoom = new ChatRoom(
+                            snapshot.child("type").getValue(String.class),
+                            snapshot.child("chatRoomId").getValue(String.class),
+                            new ArrayList<String>(),
+                            new ArrayList<Message>(),
+                            "",
+                            chatRoomUid);
+                    for (DataSnapshot ds : snapshot.child("users").getChildren()) {
+                        if (FirebaseAuth.getInstance().getCurrentUser().getUid().equals(ds.getValue(String.class))) {
+                            Toast.makeText(FriendsActivity.this, "Already Registered in this ChatRoom", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                    }
+                    Toast.makeText(FriendsActivity.this, "Successfully Registered in this ChatRoom", Toast.LENGTH_SHORT).show();
+                    FirebaseDatabase.getInstance().getReference("user/" + FirebaseAuth.getInstance().getCurrentUser().getUid()).child("chatrooms").push().setValue(chatRoom);
+                    snapshot.child("users").getRef().push().setValue(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+        }
     }
 }
