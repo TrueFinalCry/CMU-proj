@@ -54,6 +54,7 @@ public class FriendsActivity extends AppCompatActivity {
     private UsersAdapter usersAdapter;
     UsersAdapter.OnUserClickListener onUserClickListener;
     private FusedLocationProviderClient fusedLocationClient;
+    private ImageView notificationImg;
 
     private String appLinkAction;
     private Uri appLinkData;
@@ -75,6 +76,9 @@ public class FriendsActivity extends AppCompatActivity {
         swipeRefreshLayout = findViewById(R.id.swipeLayout);
         addChatRoom = findViewById(R.id.imgAddRoom);
         txtChatRoom = findViewById(R.id.edtText);
+        notificationImg = findViewById(R.id.notification);
+
+
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -249,9 +253,26 @@ public class FriendsActivity extends AppCompatActivity {
                             dataSnapshot.child("longitude").getValue(String.class),
                             dataSnapshot.child("rad").getValue(String.class)
                     );
-
-                    chatRooms.add(chatRoom);
-
+                    if (chatRoom.getType().equals("geo-fenced")) {
+                        if (!(ActivityCompat.checkSelfPermission(FriendsActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(FriendsActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
+                            fusedLocationClient.getLastLocation()
+                                    .addOnSuccessListener(FriendsActivity.this, new OnSuccessListener<Location>() {
+                                        @Override
+                                        public void onSuccess(Location location) {
+                                            // Got last known location. In some rare situations this can be null.
+                                            if (location != null) {
+                                                double longitude = location.getLongitude();
+                                                double latitude = location.getLatitude();
+                                                if (Double.parseDouble(chatRoom.getRad()) > Math.sqrt(((Double.parseDouble(chatRoom.getLongitude()) - longitude) * ((Double.parseDouble(chatRoom.getLongitude()) - longitude) + ((Double.parseDouble(chatRoom.getLatitude()) - latitude) * ((Double.parseDouble(chatRoom.getLatitude()) - latitude))))))) {
+                                                    chatRooms.add(chatRoom);
+                                                }
+                                            }
+                                        }
+                                    });
+                        }
+                    } else {
+                        chatRooms.add(chatRoom);
+                    }
                 }
                 chatRoomAdapter = new ChatRoomAdapter(chatRooms, FriendsActivity.this, onChatRoomClickListener);
                 recyclerView.setLayoutManager(new LinearLayoutManager(FriendsActivity.this));

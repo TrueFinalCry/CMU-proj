@@ -51,7 +51,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserHolder> 
 
     class UserHolder extends RecyclerView.ViewHolder {
         TextView txtUsername;
-        ImageView imageView;
+        ImageView imageView, notificationImg;
         public UserHolder(@NonNull View itemView) {
             super(itemView);
 
@@ -62,6 +62,8 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserHolder> 
                 }
             });
 
+
+            notificationImg = itemView.findViewById(R.id.notification);
             txtUsername = itemView.findViewById(R.id.txtUsername);
             imageView = itemView.findViewById(R.id.img_pro);
         }

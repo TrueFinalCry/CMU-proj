@@ -6,16 +6,20 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DownloadManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -32,7 +36,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -60,12 +67,13 @@ public class ChatRoomActivity extends AppCompatActivity {
     private String ImageToSend, fileToSend;
 
     private ArrayList<Message> messages;
+    private FusedLocationProviderClient fusedLocationClient;
 
     private MessageAdapter messageAdapter;
 
     String usernameOfTheRoommate, emailOfRoommate;
 
-    String chatRoomId, myImage,myUsername, chatRoomImage, chatRoomUid, chatRoomType,chatRoomRad, chatRoomLong,chatRoomlat;
+    String chatRoomId, myImage,myUsername, chatRoomImage, chatRoomUid, chatRoomType,chatRoomRad, chatRoomLong,chatRoomLat;
 
 
 
@@ -83,7 +91,7 @@ public class ChatRoomActivity extends AppCompatActivity {
         chatRoomType = getIntent().getStringExtra("type");
         chatRoomRad = getIntent().getStringExtra("rad");
         chatRoomLong = getIntent().getStringExtra("long");
-        chatRoomlat = getIntent().getStringExtra("lat");
+        chatRoomLat = getIntent().getStringExtra("lat");
 
         shareFile = findViewById(R.id.share_file);
         shareRoomLink = findViewById(R.id.share_link);
@@ -98,6 +106,8 @@ public class ChatRoomActivity extends AppCompatActivity {
         txtChattingWith.setText(chatRoomId);
         messages = new ArrayList<>();
         ImageToSend = "";
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         shareRoomLink.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -172,7 +182,30 @@ public class ChatRoomActivity extends AppCompatActivity {
                 FirebaseDatabase.getInstance().getReference("chatRoom/" + chatRoomUid).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        sendMessage(snapshot);
+                        if (chatRoomType.equals("geo-fenced")) {
+                            if (!(ActivityCompat.checkSelfPermission(ChatRoomActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(ChatRoomActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
+                                fusedLocationClient.getLastLocation()
+                                        .addOnSuccessListener(ChatRoomActivity.this, new OnSuccessListener<Location>() {
+                                            @Override
+                                            public void onSuccess(Location location) {
+                                                // Got last known location. In some rare situations this can be null.
+                                                if (location != null) {
+                                                    double longitude = location.getLongitude();
+                                                    double latitude = location.getLatitude();
+                                                    if (Double.parseDouble(chatRoomRad) > Math.sqrt(((Double.parseDouble(chatRoomLong)) - longitude) * ((Double.parseDouble(chatRoomLong) - longitude) + ((Double.parseDouble(chatRoomLat) - latitude) * ((Double.parseDouble(chatRoomLat) - latitude)))))) {
+                                                        sendMessage(snapshot);
+                                                    } else {
+                                                        Toast.makeText(ChatRoomActivity.this, "Locations permission denied", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                }
+                                            }
+                                        });
+                            } else {
+                                Toast.makeText(ChatRoomActivity.this, "Locations permission denied", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            sendMessage(snapshot);
+                        }
                     }
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
@@ -208,7 +241,7 @@ public class ChatRoomActivity extends AppCompatActivity {
                     .putExtra("type", chatRoomType)
                     .putExtra("rad",  chatRoomRad)
                     .putExtra("long",  chatRoomLong)
-                    .putExtra("lat",  chatRoomlat)
+                    .putExtra("lat",  chatRoomLat)
             );
         }
         return super.onOptionsItemSelected(item);
@@ -250,7 +283,6 @@ public class ChatRoomActivity extends AppCompatActivity {
 
 
     private void sendMessage(DataSnapshot snapshot) {
-
         ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("Uploading...");
         progressDialog.show();
