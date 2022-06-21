@@ -132,6 +132,10 @@ public class FriendsActivity extends AppCompatActivity {
                                                         .putExtra("room_image", chatRooms.get(position).getChatImage())
                                                         .putExtra("my_image", myUser.getProfilePicture())
                                                         .putExtra("my_username", myUser.getUsername())
+                                                        .putExtra("type", chatRooms.get(position).getType())
+                                                        .putExtra("rad", chatRooms.get(position).getRad())
+                                                        .putExtra("long", chatRooms.get(position).getLongitude())
+                                                        .putExtra("lat", chatRooms.get(position).getLatitude())
                                                         .putExtra("chat_room_uid", chatRooms.get(position).getUid())
 
                                                 );
@@ -154,6 +158,10 @@ public class FriendsActivity extends AppCompatActivity {
                             .putExtra("room_image", chatRooms.get(position).getChatImage())
                             .putExtra("my_image", myUser.getProfilePicture())
                             .putExtra("my_username", myUser.getUsername())
+                            .putExtra("type", chatRooms.get(position).getType())
+                            .putExtra("rad", chatRooms.get(position).getRad())
+                            .putExtra("long", chatRooms.get(position).getLongitude())
+                            .putExtra("lat", chatRooms.get(position).getLatitude())
                             .putExtra("chat_room_uid", chatRooms.get(position).getUid())
 
                     );

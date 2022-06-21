@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -25,6 +26,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
@@ -34,18 +36,21 @@ import com.google.firebase.storage.UploadTask;
 import java.io.IOException;
 import java.lang.ref.Reference;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.UUID;
 
 
 public class ChatRoomEditorActivity extends AppCompatActivity {
 
-    private TextView chatRoomName;
-    private Button updateAllInfo;
-    private EditText editTextUsername;
+    private TextView chatRoomName, viewUsername;
     private ImageView chatImage;
     private Uri imagePath;
+    private Button btnLeaveChatRoom, btnAdd, btnRemove;
+    private EditText txtUsername;
+    private String userUid;
+    private DatabaseReference userChatRoomRef;
 
-    private String chatRoomId, chatRoomImage;
+    private String chatRoomId, chatRoomImage, chatRoomUid,chatRoomType,chatRoomRad, chatRoomLong,chatRoomlat;
     private Reference chatRoomReference;
 
     @Override
@@ -54,116 +59,174 @@ public class ChatRoomEditorActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chat_editor);
 
         chatRoomName = findViewById(R.id.chatRoomName);
-        updateAllInfo = findViewById(R.id.updateAllInfo);
-        editTextUsername = findViewById(R.id.editTextUsername);
-        chatImage = findViewById(R.id.chatImage);
+        btnLeaveChatRoom = findViewById(R.id.btnLeaveChatRoom);
+        btnAdd = findViewById(R.id.btnAdd);
+        btnRemove = findViewById(R.id.btnRemove);
+        txtUsername = findViewById(R.id.txtUsername);
+        viewUsername = findViewById(R.id.textView2);
 
         chatRoomId = getIntent().getStringExtra("room_id");
         chatRoomImage = getIntent().getStringExtra("room_image");
-
+        chatRoomUid = getIntent().getStringExtra("room_uid");
+        chatRoomType = getIntent().getStringExtra("type");
+        chatRoomRad = getIntent().getStringExtra("rad");
+        chatRoomLong = getIntent().getStringExtra("long");
+        chatRoomlat = getIntent().getStringExtra("lat");
         chatRoomName.setText(chatRoomId);
 
+        if (!chatRoomType.equals("private")) {
+            btnRemove.setVisibility(View.GONE);
+            btnAdd.setVisibility(View.GONE);
+            txtUsername.setVisibility(View.GONE);
+            viewUsername.setVisibility(View.GONE);
+        }
 
-        Glide.with(ChatRoomEditorActivity.this).load(chatRoomImage).placeholder(R.drawable.account_image).error(R.drawable.account_image).into(chatImage);
-
-        chatImage.setOnClickListener(new View.OnClickListener() {
+        btnLeaveChatRoom.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent photoIntent = new Intent(Intent.ACTION_PICK);
-                //photoIntent.setAction(Intent.ACTION_GET_CONTENT);
-                photoIntent.setType("image/*");
-                LaunchImageChooserActivity.launch(photoIntent);
-            }
-
-            ActivityResultLauncher<Intent> LaunchImageChooserActivity = registerForActivityResult(
-                    new ActivityResultContracts.StartActivityForResult(),
-                    result -> {
-                        if (result.getResultCode() == Activity.RESULT_OK) {
-                            Intent data = result.getData();
-                            if (data != null && data.getData() != null) {
-                                imagePath = data.getData();
-                                getImageInImageView();
+                FirebaseDatabase.getInstance().getReference("chatRoom/" + chatRoomUid + "/users").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                            if(dataSnapshot.getValue(String.class).equals(FirebaseAuth.getInstance().getUid())) {
+                                dataSnapshot.getRef().removeValue();
+                                break;
                             }
                         }
-                    });
-
-            private void getImageInImageView() {
-                Bitmap bitmap = null;
-                try {
-                    bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(),imagePath);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                Glide.with(ChatRoomEditorActivity.this).load(imagePath).placeholder(R.drawable.account_image).error(R.drawable.account_image).into(chatImage);
-            }
-        });
-
-        updateAllInfo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                upload();
-            }
-        });
-    }
-
-    private void upload() {
-        ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setTitle("Uploading...");
-        progressDialog.show();
-
-        if (imagePath != null) {
-            FirebaseStorage.getInstance().getReference("images/"+ UUID.randomUUID().toString()).putFile(imagePath).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                    if (task.isSuccessful()) {
-                        task.getResult().getStorage().getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                        FirebaseDatabase.getInstance().getReference("user/" + FirebaseAuth.getInstance().getUid() + "/chatrooms").addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
-                            public void onComplete(@NonNull Task<Uri> task) {
-                                if(task.isSuccessful()) {
-                                    update(task.getResult().toString(), editTextUsername.getText().toString());
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                                    if(dataSnapshot.child("uid").getValue(String.class).equals(chatRoomUid)) {
+                                        dataSnapshot.getRef().removeValue();
+                                        Toast.makeText(ChatRoomEditorActivity.this, "Successfully left ChatRoom", Toast.LENGTH_SHORT).show();
+                                        Intent returnBtn = new Intent(getApplicationContext(), FriendsActivity.class);
+                                        returnBtn.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                        startActivity(returnBtn);
+                                    }
                                 }
+
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
                             }
                         });
-                        Toast.makeText(ChatRoomEditorActivity.this, "Uploaded successfully", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(ChatRoomEditorActivity.this, task.getException().getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                    progressDialog.dismiss();
-                }
-            }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
-                    double progress = 100.0 * snapshot.getBytesTransferred() / snapshot.getTotalByteCount();
-                    progressDialog.setMessage(" Uploaded "+(int) progress + "%");
-                }
-            });
-        } else {
-            update(chatRoomImage, editTextUsername.getText().toString());
-            progressDialog.dismiss();
-        }
-    }
-
-    private void update(String url, String username) {
-        chatRoomImage = url;
-        FirebaseDatabase.getInstance().getReference("chatRoom").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                //cycles through all users (maybe we need chatrooms instead)
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    String roomId = dataSnapshot.child("chatRoomId").getValue(String.class);
-                    if (chatRoomId.equals(roomId)) {
-                        dataSnapshot.child("chatImage").getRef().setValue(url);
-                        break;
                     }
 
-                }
-            }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
+                    }
+                });
+                //txtChatRoom.setText("");
             }
         });
-        //txtChatRoom.setText("");
+
+        btnRemove.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseDatabase.getInstance().getReference("user").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                            if(Objects.equals(dataSnapshot.child("username").getValue(String.class), txtUsername.getText().toString())) {
+                                userUid = dataSnapshot.getKey();
+                                if(userUid.equals(FirebaseAuth.getInstance().getUid())) {
+                                    Toast.makeText(ChatRoomEditorActivity.this, "Use the Leave Button to remove yourself from the ChatRoom", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+
+                                FirebaseDatabase.getInstance().getReference("chatRoom/" + chatRoomUid + "/users").addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                                            if(dataSnapshot.getValue(String.class).equals(userUid)) {
+                                                dataSnapshot.getRef().removeValue();
+                                                break;
+                                            }
+                                        }
+                                        FirebaseDatabase.getInstance().getReference("user/" + userUid + "/chatrooms").addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                                                    if(dataSnapshot.child("uid").getValue(String.class).equals(chatRoomUid)) {
+                                                        dataSnapshot.getRef().removeValue();
+                                                        Toast.makeText(ChatRoomEditorActivity.this, "Successfully removed user from ChatRoom", Toast.LENGTH_SHORT).show();
+                                                        return;
+                                                    }
+                                                }
+
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError error) {
+
+                                            }
+                                        });
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+                //txtChatRoom.setText("");
+            }
+        });
+
+
+        btnAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseDatabase.getInstance().getReference("user").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                            if(Objects.equals(dataSnapshot.child("username").getValue(String.class), txtUsername.getText().toString())) {
+                                userUid = dataSnapshot.getKey();
+                                for (DataSnapshot ds : dataSnapshot.child("chatrooms").getChildren()) {
+                                    if (chatRoomUid.equals(ds.child("uid").getValue(String.class))) {
+                                        Toast.makeText(ChatRoomEditorActivity.this, "User Already Registered in this ChatRoom", Toast.LENGTH_SHORT).show();
+                                        return;
+                                    }
+                                }
+
+                                ChatRoom chatRoom = new ChatRoom(
+                                        chatRoomType,
+                                        chatRoomId,
+                                        new ArrayList<String>(),
+                                        new ArrayList<Message>(),
+                                        "",
+                                        chatRoomUid,
+                                        chatRoomlat,
+                                        chatRoomLong,
+                                        chatRoomRad);
+                                FirebaseDatabase.getInstance().getReference("user/" + userUid).child("chatrooms").push().setValue(chatRoom);
+                                FirebaseDatabase.getInstance().getReference("chatRoom/" + chatRoomUid + "/users").push().setValue(userUid);
+                                Toast.makeText(ChatRoomEditorActivity.this, "Successfully added user to ChatRoom", Toast.LENGTH_SHORT).show();
+                                break;
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+                //txtChatRoom.setText("");
+            }
+        });
     }
 }

@@ -6,13 +6,14 @@ public class Message {
     private String chatRoomId, senderImg;
     private String username;
     private String file;
+    private String date;
     // private string reactions
 
     public Message() {
     }
 
 
-    public Message(String sender, String senderImg, String content, String imageContent, String chatRoomId, String username, String file) {
+    public Message(String sender, String senderImg, String content, String imageContent, String chatRoomId, String username, String file, String date) {
         this.sender = sender;
         this.content = content;
         this.imageContent = imageContent;
@@ -20,6 +21,15 @@ public class Message {
         this.chatRoomId = chatRoomId;
         this.senderImg = senderImg;
         this.username = username;
+        this.date = date;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
     }
 
     public String getFile() {

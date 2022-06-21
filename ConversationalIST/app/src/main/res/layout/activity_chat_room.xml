@@ -60,14 +60,13 @@
 
     <EditText
         android:id="@+id/edtText"
-        android:layout_width="314dp"
+        android:layout_width="250dp"
         android:layout_height="41dp"
         android:maxHeight="100dp"
         android:minHeight="45dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/imgSendMessage"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/imgSendPhotos" />
+        app:layout_constraintStart_toEndOf="@+id/share_file" />
 
     <ImageView
         android:id="@+id/imgSendPhotos"
@@ -82,16 +81,16 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:src="@drawable/share_room_link"
-        app:layout_constraintBottom_toTopOf="@+id/imgSendPhotos"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/imgSendPhotos" />
 
     <ImageView
         android:id="@+id/share_file"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:src="@drawable/share_file"
-        app:layout_constraintBottom_toTopOf="@+id/share_link"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/share_link" />
 
     <ImageView
         android:id="@+id/imgSendMessage"

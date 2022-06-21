@@ -44,7 +44,7 @@
             android:layout_marginHorizontal="10dp"
             android:layout_marginVertical="5dp"
             android:maxWidth="200dp"
-            android:background="@color/cardview_shadow_start_color"
+            android:background="?attr/colorSecondaryVariant"
             android:padding="8dp"/>
 
         <TextView
@@ -54,18 +54,6 @@
             android:layout_marginHorizontal="5dp"
             android:maxWidth="200dp"
             android:padding="8dp"/>
-
-        <TextView
-            android:id="@+id/file_name"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginHorizontal="10dp"
-            android:layout_marginVertical="5dp"
-            android:background="@color/cardview_shadow_start_color"
-            android:maxWidth="200dp"
-            android:padding="8dp"
-            android:text="@string/file"
-            tools:layout_editor_absoluteX="4dp" />
 
         <ImageView
             android:id="@+id/small_file_img"

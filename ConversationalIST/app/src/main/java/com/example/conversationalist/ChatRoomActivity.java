@@ -45,6 +45,7 @@ import com.google.firebase.storage.UploadTask;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.UUID;
 
 public class ChatRoomActivity extends AppCompatActivity {
@@ -64,7 +65,7 @@ public class ChatRoomActivity extends AppCompatActivity {
 
     String usernameOfTheRoommate, emailOfRoommate;
 
-    String chatRoomId, myImage,myUsername, chatRoomImage, chatRoomUid;
+    String chatRoomId, myImage,myUsername, chatRoomImage, chatRoomUid, chatRoomType,chatRoomRad, chatRoomLong,chatRoomlat;
 
 
 
@@ -78,6 +79,11 @@ public class ChatRoomActivity extends AppCompatActivity {
         myImage = getIntent().getStringExtra("my_image");
         myUsername = getIntent().getStringExtra("my_username");
         chatRoomUid = getIntent().getStringExtra("chat_room_uid");
+
+        chatRoomType = getIntent().getStringExtra("type");
+        chatRoomRad = getIntent().getStringExtra("rad");
+        chatRoomLong = getIntent().getStringExtra("long");
+        chatRoomlat = getIntent().getStringExtra("lat");
 
         shareFile = findViewById(R.id.share_file);
         shareRoomLink = findViewById(R.id.share_link);
@@ -198,6 +204,11 @@ public class ChatRoomActivity extends AppCompatActivity {
             startActivity(new Intent(ChatRoomActivity.this,ChatRoomEditorActivity.class)
                     .putExtra("room_id", chatRoomId)
                     .putExtra("room_image", chatRoomImage)
+                    .putExtra("room_uid", chatRoomUid)
+                    .putExtra("type", chatRoomType)
+                    .putExtra("rad",  chatRoomRad)
+                    .putExtra("long",  chatRoomLong)
+                    .putExtra("lat",  chatRoomlat)
             );
         }
         return super.onOptionsItemSelected(item);
@@ -264,7 +275,7 @@ public class ChatRoomActivity extends AppCompatActivity {
                                                         public void onComplete(@NonNull Task<Uri> task) {
                                                             if (task.isSuccessful()) {
                                                                 fileToSend = task.getResult().toString();
-                                                                Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), ImageToSend, chatRoomId, myUsername, fileToSend);
+                                                                Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), ImageToSend, chatRoomId, myUsername, fileToSend, Calendar.getInstance().getTime().toString());
                                                                 snapshot.child("messages").getRef().push().setValue(myMessage);
                                                                 filePath = null;
                                                                 imagePath = null;
@@ -287,7 +298,7 @@ public class ChatRoomActivity extends AppCompatActivity {
                                         });
                                     }
                                     else {
-                                        Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), ImageToSend, chatRoomId, myUsername, "");
+                                        Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), ImageToSend, chatRoomId, myUsername, "", Calendar.getInstance().getTime().toString());
                                         snapshot.child("messages").getRef().push().setValue(myMessage);
                                         imagePath = null;
                                         edtMessageInput.setText("");
@@ -319,7 +330,7 @@ public class ChatRoomActivity extends AppCompatActivity {
                                 public void onComplete(@NonNull Task<Uri> task) {
                                     if (task.isSuccessful()) {
                                         String fileToSend = task.getResult().toString();
-                                        Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), "", chatRoomId, myUsername, fileToSend);
+                                        Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), "", chatRoomId, myUsername, fileToSend, Calendar.getInstance().getTime().toString());
                                         snapshot.child("messages").getRef().push().setValue(myMessage);
                                         filePath = null;
                                         edtMessageInput.setText("");
@@ -342,7 +353,7 @@ public class ChatRoomActivity extends AppCompatActivity {
             }
             else {
                 progressDialog.dismiss();
-                Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), "", chatRoomId, myUsername, "");
+                Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), "", chatRoomId, myUsername, "", Calendar.getInstance().getTime().toString());
                 snapshot.child("messages").getRef().push().setValue(myMessage);
                 edtMessageInput.setText("");
             }

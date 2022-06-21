@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">ConversationalIST</string>
+    <string name="create">Criar</string>
+    <string name="geo_fenced">Cercado Geográfico</string>
+    <string name="join">Juntar</string>
+    <string name="search_name">Procurar Nome</string>
+    <string name="sign_up">Inscrever-se</string>
+    <string name="password">Senha</string>
+    <string name="email">Email</string>
+    <string name="username">Nome de Usuário</string>
+    <string name="guest_sign_up">Inscrição Anônima</string>
+    <string name="upload_image">Enviar Imagem</string>
+    <string name="log_out">Sair</string>
+    <string name="light_dark_mode">Modo claro/escuro</string>
+    <string name="light_mode">Modo Claro</string>
+    <string name="dark_mode">Modo Escuro</string>
+    <string name="location">Localizacao</string>
+    <string name="chatroomname">Nome Da Sala de Bate-Papo</string>
+    <string name="radius">Raio</string>
+    <string name="publicroom">Sala Publica</string>
+    <string name="privateroom">Sala Privada</string>
+    <string name="file">Ficheiro</string>
+    <string name="latitude">Latitude</string>
+    <string name="longitude">Longitude</string>
+    <string name="leave">Sair</string>
+    <string name="add">Adicionar</string>
+    <string name="remove">Remover</string>
+</resources>

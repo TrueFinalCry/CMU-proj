@@ -22,4 +22,7 @@
     <string name="file">File</string>
     <string name="latitude">latitude</string>
     <string name="longitude">longitude</string>
+    <string name="leave">Leave</string>
+    <string name="add">Add</string>
+    <string name="remove">Remove</string>
 </resources>

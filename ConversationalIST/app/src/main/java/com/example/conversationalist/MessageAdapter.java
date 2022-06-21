@@ -49,7 +49,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageH
     @Override
     public void onBindViewHolder(@NonNull MessageHolder holder, int position) {
         holder.txtMessage.setText(messages.get(position).getContent());
-        holder.txtUsername.setText(messages.get(position).getUsername());
+        String nameDate = messages.get(position).getUsername() + " - " + messages.get(position).getDate();
+        holder.txtUsername.setText(nameDate);
 
         if (!messages.get(position).getImageContent().equals("")) {
             holder.imgSend.setVisibility(View.VISIBLE);
@@ -65,12 +66,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageH
 
         if (!messages.get(position).getFile().equals("")) {
             holder.fileImg.setVisibility(View.VISIBLE);
-            holder.fileName.setVisibility(View.VISIBLE);
-            holder.fileName.setText(messages.get(position).getFile());
         }
         else {
             holder.fileImg.setVisibility(View.GONE);
-            holder.fileName.setVisibility(View.GONE);
         }
 
         ConstraintLayout constraintLayout = holder.ccll;
@@ -88,7 +86,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageH
             constraintSet.clear(R.id.img_send, ConstraintSet.LEFT);
 
             constraintSet.clear(R.id.small_file_img, ConstraintSet.LEFT);
-            constraintSet.clear(R.id.file_name, ConstraintSet.LEFT);
 
             constraintSet.connect(R.id.profile_cardView, ConstraintSet.RIGHT, R.id.ccLayout, ConstraintSet.RIGHT, 0);
             constraintSet.connect(R.id.txt_message_content, ConstraintSet.RIGHT, R.id.ccLayout, ConstraintSet.RIGHT, 0);
@@ -98,16 +95,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageH
             constraintSet.connect(R.id.txt_username_content, ConstraintSet.RIGHT, R.id.profile_cardView, ConstraintSet.LEFT, 0);
 
             if (!messages.get(position).getImageContent().equals("")) {
-                constraintSet.connect(R.id.file_name, ConstraintSet.RIGHT, R.id.ccLayout, ConstraintSet.RIGHT, 0);
                 constraintSet.connect(R.id.small_file_img, ConstraintSet.RIGHT, R.id.ccLayout, ConstraintSet.RIGHT, 0);
-                constraintSet.connect(R.id.file_name, ConstraintSet.TOP, R.id.img_send, ConstraintSet.BOTTOM, 0);
-                constraintSet.connect(R.id.small_file_img, ConstraintSet.TOP, R.id.file_name, ConstraintSet.BOTTOM, 0);
+                constraintSet.connect(R.id.small_file_img, ConstraintSet.TOP, R.id.img_send, ConstraintSet.BOTTOM, 0);
             }
             else {
-                constraintSet.connect(R.id.file_name, ConstraintSet.RIGHT, R.id.ccLayout, ConstraintSet.RIGHT, 0);
                 constraintSet.connect(R.id.small_file_img, ConstraintSet.RIGHT, R.id.ccLayout, ConstraintSet.RIGHT, 0);
-                constraintSet.connect(R.id.file_name, ConstraintSet.TOP, R.id.img_send, ConstraintSet.BOTTOM, 0);
-                constraintSet.connect(R.id.small_file_img, ConstraintSet.TOP, R.id.file_name, ConstraintSet.BOTTOM, 0);
+                constraintSet.connect(R.id.small_file_img, ConstraintSet.TOP, R.id.img_send, ConstraintSet.BOTTOM, 0);
             }
 
             constraintSet.applyTo(constraintLayout);
@@ -124,7 +117,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageH
             constraintSet.clear(R.id.txt_username_content, ConstraintSet.RIGHT);
 
             constraintSet.clear(R.id.small_file_img, ConstraintSet.RIGHT);
-            constraintSet.clear(R.id.file_name, ConstraintSet.RIGHT);
 
             constraintSet.connect(R.id.profile_cardView, ConstraintSet.LEFT, R.id.ccLayout, ConstraintSet.LEFT, 0);
             constraintSet.connect(R.id.txt_message_content, ConstraintSet.LEFT, R.id.ccLayout, ConstraintSet.LEFT, 0);
@@ -134,16 +126,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageH
             constraintSet.connect(R.id.txt_username_content, ConstraintSet.LEFT, R.id.profile_cardView, ConstraintSet.RIGHT, 0);
 
             if (!messages.get(position).getImageContent().equals("")) {
-                constraintSet.connect(R.id.file_name, ConstraintSet.LEFT, R.id.ccLayout, ConstraintSet.LEFT, 0);
                 constraintSet.connect(R.id.small_file_img, ConstraintSet.LEFT, R.id.ccLayout, ConstraintSet.LEFT, 0);
-                constraintSet.connect(R.id.file_name, ConstraintSet.TOP, R.id.img_send, ConstraintSet.BOTTOM, 0);
-                constraintSet.connect(R.id.small_file_img, ConstraintSet.TOP, R.id.file_name, ConstraintSet.BOTTOM, 0);
+                constraintSet.connect(R.id.small_file_img, ConstraintSet.TOP, R.id.img_send, ConstraintSet.BOTTOM, 0);
             }
             else {
-                constraintSet.connect(R.id.file_name, ConstraintSet.LEFT, R.id.ccLayout, ConstraintSet.LEFT, 0);
                 constraintSet.connect(R.id.small_file_img, ConstraintSet.LEFT, R.id.ccLayout, ConstraintSet.LEFT, 0);
-                constraintSet.connect(R.id.file_name, ConstraintSet.TOP, R.id.img_send, ConstraintSet.BOTTOM, 0);
-                constraintSet.connect(R.id.small_file_img, ConstraintSet.TOP, R.id.file_name, ConstraintSet.BOTTOM, 0);
+                constraintSet.connect(R.id.small_file_img, ConstraintSet.TOP, R.id.img_send, ConstraintSet.BOTTOM, 0);
             }
 
             constraintSet.applyTo(constraintLayout);
@@ -172,7 +160,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageH
             profImage = itemView.findViewById(R.id.small_profile_img);
             imgSend = itemView.findViewById(R.id.img_send);
             fileImg = itemView.findViewById(R.id.small_file_img);
-            fileName = itemView.findViewById(R.id.file_name);
+
 
             fileImg.setOnClickListener(new View.OnClickListener() {
                 @Override
