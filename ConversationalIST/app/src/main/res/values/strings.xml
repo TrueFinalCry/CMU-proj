@@ -20,4 +20,6 @@
     <string name="publicroom">PublicRoom</string>
     <string name="privateroom">PrivateRoom</string>
     <string name="file">File</string>
+    <string name="latitude">latitude</string>
+    <string name="longitude">longitude</string>
 </resources>

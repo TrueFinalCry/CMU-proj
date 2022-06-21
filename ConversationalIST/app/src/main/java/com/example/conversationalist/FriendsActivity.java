@@ -5,12 +5,16 @@ import static androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -24,6 +28,9 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -46,6 +53,7 @@ public class FriendsActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private UsersAdapter usersAdapter;
     UsersAdapter.OnUserClickListener onUserClickListener;
+    private FusedLocationProviderClient fusedLocationClient;
 
     private String appLinkAction;
     private Uri appLinkData;
@@ -67,6 +75,8 @@ public class FriendsActivity extends AppCompatActivity {
         swipeRefreshLayout = findViewById(R.id.swipeLayout);
         addChatRoom = findViewById(R.id.imgAddRoom);
         txtChatRoom = findViewById(R.id.edtText);
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
 
         FirebaseDatabase.getInstance().getReference("user").addListenerForSingleValueEvent(new ValueEventListener() {
@@ -103,16 +113,53 @@ public class FriendsActivity extends AppCompatActivity {
         onChatRoomClickListener = new ChatRoomAdapter.OnChatRoomClickListener() {
             @Override
             public void onChatRoomClicked(int position) {
-                startActivity(new Intent(FriendsActivity.this, ChatRoomActivity.class)
-                        // arguments of chatroom (1 user so far)
-                        .putExtra("room_id", chatRooms.get(position).getChatRoomId())
-                        .putExtra("room_image", chatRooms.get(position).getChatImage())
-                        .putExtra("my_image", myUser.getProfilePicture())
-                        .putExtra("my_username", myUser.getUsername())
-                        .putExtra("chat_room_uid", chatRooms.get(position).getUid())
+                if (chatRooms.get(position).getType().equals("geo-fenced")) {
+                    if (!(ActivityCompat.checkSelfPermission(FriendsActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(FriendsActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
+                        fusedLocationClient.getLastLocation()
+                                .addOnSuccessListener(FriendsActivity.this, new OnSuccessListener<Location>() {
+                                    @Override
+                                    public void onSuccess(Location location) {
+                                        // Got last known location. In some rare situations this can be null.
+                                        if (location != null) {
+                                            double longitude = location.getLongitude();
+                                            double latitude =  location.getLatitude();
+                                            Log.d("GYAWGF", "lat " + latitude + " long " + longitude);
+                                            Log.d("GYAWGF", "lat " + chatRooms.get(position).getLatitude() + " long " + chatRooms.get(position).getLongitude());
+                                            if ( Double.parseDouble(chatRooms.get(position).getRad()) > Math.sqrt(((Double.parseDouble(chatRooms.get(position).getLongitude()) - longitude) * ((Double.parseDouble(chatRooms.get(position).getLongitude()) - longitude) + ((Double.parseDouble(chatRooms.get(position).getLatitude()) - latitude) * ((Double.parseDouble(chatRooms.get(position).getLatitude()) - latitude))))))) {
+                                                startActivity(new Intent(FriendsActivity.this, ChatRoomActivity.class)
+                                                        // arguments of chatroom (1 user so far)
+                                                        .putExtra("room_id", chatRooms.get(position).getChatRoomId())
+                                                        .putExtra("room_image", chatRooms.get(position).getChatImage())
+                                                        .putExtra("my_image", myUser.getProfilePicture())
+                                                        .putExtra("my_username", myUser.getUsername())
+                                                        .putExtra("chat_room_uid", chatRooms.get(position).getUid())
 
-                );
-                Toast.makeText(FriendsActivity.this, "Selected chatroom " + chatRooms.get(position).getChatRoomId(), Toast.LENGTH_SHORT).show();
+                                                );
+                                                Toast.makeText(FriendsActivity.this, "Selected chatroom " + chatRooms.get(position).getChatRoomId(), Toast.LENGTH_SHORT).show();
+                                            }
+                                            else {
+                                                Toast.makeText(FriendsActivity.this, "Outside of radius for chatroom " + chatRooms.get(position).getChatRoomId(), Toast.LENGTH_SHORT).show();
+
+                                            }
+                                        }
+                                    }
+                                });
+                    } else {
+                        Toast.makeText(FriendsActivity.this, "Location permission denied " + chatRooms.get(position).getChatRoomId(), Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    startActivity(new Intent(FriendsActivity.this, ChatRoomActivity.class)
+                            // arguments of chatroom (1 user so far)
+                            .putExtra("room_id", chatRooms.get(position).getChatRoomId())
+                            .putExtra("room_image", chatRooms.get(position).getChatImage())
+                            .putExtra("my_image", myUser.getProfilePicture())
+                            .putExtra("my_username", myUser.getUsername())
+                            .putExtra("chat_room_uid", chatRooms.get(position).getUid())
+
+                    );
+                    Toast.makeText(FriendsActivity.this, "Selected chatroom " + chatRooms.get(position).getChatRoomId(), Toast.LENGTH_SHORT).show();
+                }
+
             }
         };
 
@@ -189,7 +236,10 @@ public class FriendsActivity extends AppCompatActivity {
                             userList,
                             messageList,
                             dataSnapshot.child("chatImage").getValue(String.class),
-                            dataSnapshot.child("uid").getValue(String.class)
+                            dataSnapshot.child("uid").getValue(String.class),
+                            dataSnapshot.child("latitude").getValue(String.class),
+                            dataSnapshot.child("longitude").getValue(String.class),
+                            dataSnapshot.child("rad").getValue(String.class)
                     );
 
                     chatRooms.add(chatRoom);
@@ -227,7 +277,10 @@ public class FriendsActivity extends AppCompatActivity {
                             new ArrayList<String>(),
                             new ArrayList<Message>(),
                             "",
-                            chatRoomUid);
+                            chatRoomUid,
+                            snapshot.child("latitude").getValue(String.class),
+                            snapshot.child("longitude").getValue(String.class),
+                            snapshot.child("rad").getValue(String.class));
                     for (DataSnapshot ds : snapshot.child("users").getChildren()) {
                         if (FirebaseAuth.getInstance().getCurrentUser().getUid().equals(ds.getValue(String.class))) {
                             Toast.makeText(FriendsActivity.this, "Already Registered in this ChatRoom", Toast.LENGTH_SHORT).show();

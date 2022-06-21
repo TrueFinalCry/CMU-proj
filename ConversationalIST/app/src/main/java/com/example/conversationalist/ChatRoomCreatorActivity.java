@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -24,6 +25,7 @@ import androidx.core.app.ActivityCompat;
 
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
@@ -32,6 +34,7 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -43,10 +46,13 @@ import java.util.ArrayList;
 
 public class ChatRoomCreatorActivity extends AppCompatActivity {
     private Button btnPublic, btnPrivate, btnGeo, btnCreate, btnJoin;
-    private EditText txtChatRoomName, txtLocation, txtRadius;
+    private EditText txtChatRoomName, txtLocationLat,txtLocationLong, txtRadius;
     private String location;
     private String type;
     private LocationRequest locationRequest;
+    private double longitude, latitude, rad;
+    private FusedLocationProviderClient fusedLocationClient;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +61,9 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chat_creator);
 
         txtChatRoomName = findViewById(R.id.chatRoomName);
-        txtLocation = findViewById(R.id.txtLocation);
+        txtLocationLat = findViewById(R.id.txtLocationLat);
+        txtLocationLong = findViewById(R.id.txtLocationLong);
+
         txtRadius = findViewById(R.id.txtRadius);
         btnPublic = findViewById(R.id.publicButton);
         btnPrivate = findViewById(R.id.privateButton);
@@ -63,7 +71,8 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
         btnCreate = findViewById(R.id.createButton);
         btnJoin = findViewById(R.id.joinButton);
 
-        txtLocation.setVisibility(View.GONE);
+        txtLocationLong.setVisibility(View.GONE);
+        txtLocationLat.setVisibility(View.GONE);
         txtRadius.setVisibility(View.GONE);
 
         location = "";
@@ -72,66 +81,69 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
 
 
         btnJoin.setOnClickListener(new View.OnClickListener() {
-           @Override
-           public void onClick(View v) {
-               FirebaseDatabase.getInstance().getReference("chatRoom").addListenerForSingleValueEvent(new ValueEventListener() {
-                   @Override
-                   public void onDataChange(@NonNull DataSnapshot snapshot) {
-                       //cycles through all users (maybe we need chatrooms instead)
-                       for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                           String roomId = dataSnapshot.child("chatRoomId").getValue(String.class);
-                           if (txtChatRoomName.getText().toString().equals(roomId)) {
-                               ChatRoom chatRoom = new ChatRoom(
-                                       type,
-                                       txtChatRoomName.getText().toString(),
-                                       new ArrayList<String>(),
-                                       new ArrayList<Message>(),
-                                       "",
-                                       dataSnapshot.getKey());
+            @Override
+            public void onClick(View v) {
+                FirebaseDatabase.getInstance().getReference("chatRoom").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        //cycles through all users (maybe we need chatrooms instead)
+                        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                            String roomId = dataSnapshot.child("chatRoomId").getValue(String.class);
+                            if (txtChatRoomName.getText().toString().equals(roomId)) {
+                                ChatRoom chatRoom = new ChatRoom(
+                                        type,
+                                        txtChatRoomName.getText().toString(),
+                                        new ArrayList<String>(),
+                                        new ArrayList<Message>(),
+                                        "",
+                                        dataSnapshot.getKey(),
+                                        dataSnapshot.child("latitude").getValue(String.class),
+                                        dataSnapshot.child("longitude").getValue(String.class),
+                                        dataSnapshot.child("rad").getValue(String.class));
 
-                               if (dataSnapshot.child("type").getValue(String.class).equals("public")) {
-                                   for (DataSnapshot ds : dataSnapshot.child("users").getChildren()) {
-                                       if (FirebaseAuth.getInstance().getCurrentUser().getUid().equals(ds.getValue(String.class))) {
-                                           Toast.makeText(ChatRoomCreatorActivity.this, "Already Registered in this ChatRoom", Toast.LENGTH_SHORT).show();
-                                           return;
-                                       }
-                                   }
-                                   Toast.makeText(ChatRoomCreatorActivity.this, "Successfully Registered in this ChatRoom", Toast.LENGTH_SHORT).show();
-                                   FirebaseDatabase.getInstance().getReference("user/" + FirebaseAuth.getInstance().getCurrentUser().getUid()).child("chatrooms").push().setValue(chatRoom);
-                                   dataSnapshot.child("users").getRef().push().setValue(FirebaseAuth.getInstance().getCurrentUser().getUid());
-                                   return;
-                               } else if (dataSnapshot.child("type").getValue(String.class).equals("private")) {
-                                   Toast.makeText(ChatRoomCreatorActivity.this, "This ChatRoom is private", Toast.LENGTH_SHORT).show();
-                                   return;
-                               } else if (dataSnapshot.child("type").getValue(String.class).equals("geo-fenced")){
+                                if (dataSnapshot.child("type").getValue(String.class).equals("public")) {
+                                    for (DataSnapshot ds : dataSnapshot.child("users").getChildren()) {
+                                        if (FirebaseAuth.getInstance().getCurrentUser().getUid().equals(ds.getValue(String.class))) {
+                                            Toast.makeText(ChatRoomCreatorActivity.this, "Already Registered in this ChatRoom", Toast.LENGTH_SHORT).show();
+                                            return;
+                                        }
+                                    }
+                                    Toast.makeText(ChatRoomCreatorActivity.this, "Successfully Registered in this ChatRoom", Toast.LENGTH_SHORT).show();
+                                    FirebaseDatabase.getInstance().getReference("user/" + FirebaseAuth.getInstance().getCurrentUser().getUid()).child("chatrooms").push().setValue(chatRoom);
+                                    dataSnapshot.child("users").getRef().push().setValue(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                                    return;
+                                } else if (dataSnapshot.child("type").getValue(String.class).equals("private")) {
+                                    Toast.makeText(ChatRoomCreatorActivity.this, "This ChatRoom is private", Toast.LENGTH_SHORT).show();
+                                    return;
+                                } else if (dataSnapshot.child("type").getValue(String.class).equals("geo-fenced")) {
                                     // check localization
 
-                                   // Toast.makeText(ChatRoomCreatorActivity.this, "ChatRoom to far away", Toast.LENGTH_SHORT).show();
-                                   for (DataSnapshot ds : dataSnapshot.child("users").getChildren()) {
-                                       if (FirebaseAuth.getInstance().getCurrentUser().getUid().equals(ds.getValue(String.class))) {
-                                           Toast.makeText(ChatRoomCreatorActivity.this, "Already Registered in this ChatRoom", Toast.LENGTH_SHORT).show();
-                                           return;
-                                       }
-                                   }
-                                   Toast.makeText(ChatRoomCreatorActivity.this, "Successfully Registered in this ChatRoom", Toast.LENGTH_SHORT).show();
-                                   FirebaseDatabase.getInstance().getReference("user/" + FirebaseAuth.getInstance().getCurrentUser().getUid()).child("chatrooms").push().setValue(chatRoom);
-                                   dataSnapshot.child("users").getRef().push().setValue(FirebaseAuth.getInstance().getCurrentUser().getUid());
-                                   return;
-                               }
-                               return;
-                           }
+                                    // Toast.makeText(ChatRoomCreatorActivity.this, "ChatRoom to far away", Toast.LENGTH_SHORT).show();
+                                    for (DataSnapshot ds : dataSnapshot.child("users").getChildren()) {
+                                        if (FirebaseAuth.getInstance().getCurrentUser().getUid().equals(ds.getValue(String.class))) {
+                                            Toast.makeText(ChatRoomCreatorActivity.this, "Already Registered in this ChatRoom", Toast.LENGTH_SHORT).show();
+                                            return;
+                                        }
+                                    }
+                                    Toast.makeText(ChatRoomCreatorActivity.this, "Successfully Registered in this ChatRoom", Toast.LENGTH_SHORT).show();
+                                    FirebaseDatabase.getInstance().getReference("user/" + FirebaseAuth.getInstance().getCurrentUser().getUid()).child("chatrooms").push().setValue(chatRoom);
+                                    dataSnapshot.child("users").getRef().push().setValue(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                                    return;
+                                }
+                                return;
+                            }
 
-                       }
-                       Toast.makeText(ChatRoomCreatorActivity.this, "ChatRoom doesn't exist", Toast.LENGTH_SHORT).show();
+                        }
+                        Toast.makeText(ChatRoomCreatorActivity.this, "ChatRoom doesn't exist", Toast.LENGTH_SHORT).show();
 
-                   }
+                    }
 
-                   @Override
-                   public void onCancelled(@NonNull DatabaseError error) {
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
 
-                   }
-               });
-           }
+                    }
+                });
+            }
         });
 
         btnCreate.setOnClickListener(new View.OnClickListener() {
@@ -140,7 +152,7 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
                 FirebaseDatabase.getInstance().getReference("chatRoom").addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        String key ="";
+                        String key = "";
                         //cycles through all users (maybe we need chatrooms instead)
                         for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                             String roomId = dataSnapshot.child("chatRoomId").getValue(String.class);
@@ -156,7 +168,10 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
                                 new ArrayList<String>(),
                                 new ArrayList<Message>(),
                                 "",
-                                "");
+                                "",
+                                txtLocationLat.getText().toString(),
+                                txtLocationLong.getText().toString(),
+                                txtRadius.getText().toString());
                         FirebaseDatabase.getInstance().getReference("chatRoom").push().setValue(chatRoom);
 
                         FirebaseDatabase.getInstance().getReference("chatRoom").addListenerForSingleValueEvent(new ValueEventListener() {
@@ -175,16 +190,20 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
                                                 new ArrayList<String>(),
                                                 new ArrayList<Message>(),
                                                 "",
-                                                dataSnapshot.getRef().getKey());
+                                                dataSnapshot.getRef().getKey(),
+                                                txtLocationLat.getText().toString(),
+                                                txtLocationLong.getText().toString(),
+                                                txtRadius.getText().toString());
                                         FirebaseDatabase.getInstance().getReference("chatRoom/" + dataSnapshot.getRef().getKey() + "/uid").setValue(dataSnapshot.getRef().getKey());
-                                        FirebaseDatabase.getInstance().getReference("user/"+ FirebaseAuth.getInstance().getCurrentUser().getUid()).child("chatrooms").push().setValue(chatRoom);
+                                        FirebaseDatabase.getInstance().getReference("user/" + FirebaseAuth.getInstance().getCurrentUser().getUid()).child("chatrooms").push().setValue(chatRoom);
                                         //FirebaseDatabase.getInstance().getReference("chatRoom/"+txtChatRoom.getText().toString()+"/users").push().setValue(myUser);
                                         return;
                                     }
                                 }
                             }
+
                             @Override
-                            public void onCancelled (@NonNull DatabaseError error){
+                            public void onCancelled(@NonNull DatabaseError error) {
 
                             }
                         });
@@ -205,7 +224,8 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
             public void onClick(View v) {
                 type = "private";
 
-                txtLocation.setVisibility(View.GONE);
+                txtLocationLat.setVisibility(View.GONE);
+                txtLocationLong.setVisibility(View.GONE);
                 txtRadius.setVisibility(View.GONE);
             }
         });
@@ -214,20 +234,46 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
             public void onClick(View v) {
                 type = "public";
 
-                txtLocation.setVisibility(View.GONE);
+                txtLocationLat.setVisibility(View.GONE);
+                txtLocationLong.setVisibility(View.GONE);
                 txtRadius.setVisibility(View.GONE);
 
             }
         });
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
         btnGeo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 type = "geo-fenced";
 
-                txtLocation.setVisibility(View.VISIBLE);
+                txtLocationLat.setVisibility(View.VISIBLE);
+                txtLocationLong.setVisibility(View.VISIBLE);
                 txtRadius.setVisibility(View.VISIBLE);
 
-                getCurrentLocation();
+                if (!(ActivityCompat.checkSelfPermission(ChatRoomCreatorActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(ChatRoomCreatorActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
+                    fusedLocationClient.getLastLocation()
+                            .addOnSuccessListener(ChatRoomCreatorActivity.this, new OnSuccessListener<Location>() {
+                                @Override
+                                public void onSuccess(Location location) {
+                                    // Got last known location. In some rare situations this can be null.
+                                    if (location != null) {
+                                        longitude = location.getLongitude();
+                                        latitude =  location.getLatitude();
+
+                                        String locationStringLat = ""+latitude;
+                                        String locationStringLong = ""+longitude;
+                                        txtLocationLat.setText(locationStringLat);
+                                        txtLocationLong.setText(locationStringLong);
+
+                                    }
+                                }
+                            });
+                }
+
+
+                //getCurrentLocation();
 
 
             }
@@ -306,9 +352,6 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
     }
 
     private void turnOnGPS() {
-
-
-
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
                 .addLocationRequest(locationRequest);
         builder.setAlwaysShow(true);

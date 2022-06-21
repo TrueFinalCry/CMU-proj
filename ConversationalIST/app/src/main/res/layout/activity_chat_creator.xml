@@ -12,23 +12,37 @@
         android:ems="10"
         android:inputType="textPersonName"
         android:text="@string/chatroomname"
-        app:layout_constraintBottom_toTopOf="@+id/txtLocation"
-        app:layout_constraintEnd_toEndOf="@+id/txtLocation"
+        app:layout_constraintBottom_toTopOf="@+id/txtLocationLat"
+        app:layout_constraintEnd_toEndOf="@+id/txtLocationLat"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/txtLocation"
+        app:layout_constraintStart_toStartOf="@+id/txtLocationLat"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.554" />
 
     <EditText
-        android:id="@+id/txtLocation"
+        android:id="@+id/txtLocationLat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="36dp"
+        android:layout_marginBottom="12dp"
         android:ems="10"
         android:inputType="textPersonName"
-        android:text="@string/location"
+        android:text="@string/latitude"
         app:layout_constraintBottom_toTopOf="@+id/txtRadius"
         app:layout_constraintEnd_toEndOf="@+id/txtRadius"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/txtRadius" />
+
+    <EditText
+        android:id="@+id/txtLocationLong"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="@string/longitude"
+        app:layout_constraintBottom_toTopOf="@+id/txtLocationLat"
+        app:layout_constraintEnd_toEndOf="@+id/txtRadius"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/txtRadius" />
 
     <EditText
