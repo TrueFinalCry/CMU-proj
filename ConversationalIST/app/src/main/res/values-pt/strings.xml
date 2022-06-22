@@ -25,4 +25,10 @@
     <string name="leave">Sair</string>
     <string name="add">Adicionar</string>
     <string name="remove">Remover</string>
+    <string name="log_in">Log in</string>
+    <string name="already_have_an_account_log_in">Already have an account? Log in</string>
+    <string name="don_t_have_an_account_sign_up">Don\'t have an account? Sign up!</string>
+    <string name="simple_sign_up">Simple Sign Up</string>
+    <string name="simple_log_in">Simple log in</string>
+    <string name="upgrade_account">Upgrade Account</string>
 </resources>

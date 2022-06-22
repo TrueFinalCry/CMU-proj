@@ -55,6 +55,7 @@ public class FriendsActivity extends AppCompatActivity {
     UsersAdapter.OnUserClickListener onUserClickListener;
     private FusedLocationProviderClient fusedLocationClient;
     private ImageView notificationImg;
+    private String currPassword = "";
 
     private String appLinkAction;
     private Uri appLinkData;
@@ -77,6 +78,8 @@ public class FriendsActivity extends AppCompatActivity {
         addChatRoom = findViewById(R.id.imgAddRoom);
         txtChatRoom = findViewById(R.id.edtText);
         notificationImg = findViewById(R.id.notification);
+
+        currPassword = getIntent().getStringExtra("password");
 
 
 
@@ -206,6 +209,7 @@ public class FriendsActivity extends AppCompatActivity {
             startActivity(new Intent(FriendsActivity.this,Profile.class)
                     .putExtra("my_image", myUser.getProfilePicture())
                     .putExtra("my_username", myUser.getUsername())
+                    .putExtra("password", currPassword)
             );
         }
         return super.onOptionsItemSelected(item);
