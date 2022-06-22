@@ -145,9 +145,11 @@ public class Profile extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+                if (edtPassword.getText().toString().isEmpty()) {
+                    Toast.makeText(Profile.this, "Please introduce password", Toast.LENGTH_SHORT).show();
+                }
                 AuthCredential credential = EmailAuthProvider
                         .getCredential(FirebaseAuth.getInstance().getCurrentUser().getEmail(), currPassword);
-                Log.d("AAAAAAAAAAAAA", edtPassword.getText().toString());
 
                 FirebaseAuth.getInstance().getCurrentUser().reauthenticate(credential)
                         .addOnCompleteListener(new OnCompleteListener<Void>() {
