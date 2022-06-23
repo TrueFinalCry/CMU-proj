@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -15,15 +16,19 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DownloadManager;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.ImageFormat;
 import android.location.Location;
+import android.media.Image;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
@@ -50,10 +55,13 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.UUID;
+
+import javax.xml.transform.Result;
 
 public class ChatRoomActivity extends AppCompatActivity {
 
@@ -64,7 +72,9 @@ public class ChatRoomActivity extends AppCompatActivity {
     private ImageView chatIcon,imgSend,imgSendPhotos, shareRoomLink,shareFile;
     private Uri imagePath;
     private Uri filePath;
+    private Uri imageUri;
     private String ImageToSend, fileToSend;
+    static final int REQUEST_IMAGE_CAPTURE = 1;
 
     private ArrayList<Message> messages;
     private FusedLocationProviderClient fusedLocationClient;
@@ -113,8 +123,13 @@ public class ChatRoomActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String linkInfo = "http://conversationalist-3003c-default-rtdb.firebaseio.com/chatRoom/" + chatRoomUid;
-                String toSend = edtMessageInput.getText().toString() + linkInfo;
-                edtMessageInput.setText(toSend);
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_TEXT, linkInfo);
+                sendIntent.setType("text/plain");
+
+                Intent shareIntent = Intent.createChooser(sendIntent, null);
+                startActivity(shareIntent);
             }
         });
 
@@ -148,21 +163,33 @@ public class ChatRoomActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                Intent photoIntent = new Intent(Intent.ACTION_PICK);
-                photoIntent.setAction(Intent.ACTION_GET_CONTENT);
-                photoIntent.setType("image/*");
-                LaunchImageChooserActivity.launch(photoIntent);
+                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,imageUri);
+
+                try {
+                    LaunchImageChooserActivity.launch(takePictureIntent);
+                } catch (ActivityNotFoundException e) {
+                    // display error state to the user
+                }
             }
 
             ActivityResultLauncher<Intent> LaunchImageChooserActivity = registerForActivityResult(
                     new ActivityResultContracts.StartActivityForResult(),
                     result -> {
+                        Log.d("AAAAAAAAAA", String.valueOf(result.getResultCode()));
                         if (result.getResultCode() == Activity.RESULT_OK) {
                             Intent data = result.getData();
+                            Log.d("AAAAAAAAAA", String.valueOf(data.getData()));
                             if (data != null && data.getData() != null) {
+                                File folder = new File(Environment.getExternalStorageDirectory().toString()+"/ImagesFolder/");
+                                folder.mkdirs();
+                                imagePath = FileProvider.getUriForFile(ChatRoomActivity.this, getApplicationContext().getPackageName() + ".provider", new File(Environment.getExternalStorageDirectory().toString()+"/ImagesFolder/image.jpg"));
                                 imagePath = data.getData();
+                                Log.d("AAAAAAAAAA", imagePath.toString());
                                 getImageInImageView();
                             }
+
                         }
                     });
 
@@ -258,6 +285,8 @@ public class ChatRoomActivity extends AppCompatActivity {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             messages.clear();
+                            FirebaseDatabase.getInstance().getReference("user/" + FirebaseAuth.getInstance().getUid() + "/chatrooms/" + chatRoomUid + "/unread").setValue("0");
+
                             for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                                 messages.add(dataSnapshot.getValue(Message.class));
                             }
@@ -307,8 +336,9 @@ public class ChatRoomActivity extends AppCompatActivity {
                                                         public void onComplete(@NonNull Task<Uri> task) {
                                                             if (task.isSuccessful()) {
                                                                 fileToSend = task.getResult().toString();
-                                                                Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), ImageToSend, chatRoomId, myUsername, fileToSend, Calendar.getInstance().getTime().toString());
+                                                                Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), ImageToSend, chatRoomId, myUsername, fileToSend, Calendar.getInstance().getTime().toString().substring(0,Calendar.getInstance().getTime().toString().length()-4));
                                                                 snapshot.child("messages").getRef().push().setValue(myMessage);
+                                                                sendNotification();
                                                                 filePath = null;
                                                                 imagePath = null;
                                                                 edtMessageInput.setText("");
@@ -330,8 +360,9 @@ public class ChatRoomActivity extends AppCompatActivity {
                                         });
                                     }
                                     else {
-                                        Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), ImageToSend, chatRoomId, myUsername, "", Calendar.getInstance().getTime().toString());
+                                        Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), ImageToSend, chatRoomId, myUsername, "", Calendar.getInstance().getTime().toString().substring(0,Calendar.getInstance().getTime().toString().length()-4));
                                         snapshot.child("messages").getRef().push().setValue(myMessage);
+                                        sendNotification();
                                         imagePath = null;
                                         edtMessageInput.setText("");
                                     }
@@ -362,8 +393,9 @@ public class ChatRoomActivity extends AppCompatActivity {
                                 public void onComplete(@NonNull Task<Uri> task) {
                                     if (task.isSuccessful()) {
                                         String fileToSend = task.getResult().toString();
-                                        Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), "", chatRoomId, myUsername, fileToSend, Calendar.getInstance().getTime().toString());
+                                        Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), "", chatRoomId, myUsername, fileToSend, Calendar.getInstance().getTime().toString().substring(0,Calendar.getInstance().getTime().toString().length()-4));
                                         snapshot.child("messages").getRef().push().setValue(myMessage);
+                                        sendNotification();
                                         filePath = null;
                                         edtMessageInput.setText("");
                                     }
@@ -385,12 +417,35 @@ public class ChatRoomActivity extends AppCompatActivity {
             }
             else {
                 progressDialog.dismiss();
-                Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), "", chatRoomId, myUsername, "", Calendar.getInstance().getTime().toString());
+                Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), "", chatRoomId, myUsername, "", Calendar.getInstance().getTime().toString().substring(0,Calendar.getInstance().getTime().toString().length()-4));
                 snapshot.child("messages").getRef().push().setValue(myMessage);
+                sendNotification();
                 edtMessageInput.setText("");
             }
         }
     }
+
+    private void sendNotification() {
+        FirebaseDatabase.getInstance().getReference("chatRoom/" + chatRoomUid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                //cycles through all users
+
+                for (DataSnapshot ds : snapshot.child("users").getChildren()) {
+                    String userUid = ds.getValue(String.class);
+                    if (userUid.equals(FirebaseAuth.getInstance().getUid())) {
+                        continue;
+                    }
+                    FirebaseDatabase.getInstance().getReference("user/" + userUid + "/chatrooms/" + chatRoomUid + "/unread").setValue("1");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
+    }
+
     public boolean isConnected() {
         boolean connected = false;
         try {

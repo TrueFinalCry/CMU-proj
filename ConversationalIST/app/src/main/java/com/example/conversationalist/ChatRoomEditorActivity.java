@@ -211,8 +211,9 @@ public class ChatRoomEditorActivity extends AppCompatActivity {
                                         chatRoomUid,
                                         chatRoomlat,
                                         chatRoomLong,
-                                        chatRoomRad);
-                                FirebaseDatabase.getInstance().getReference("user/" + userUid).child("chatrooms").push().setValue(chatRoom);
+                                        chatRoomRad,
+                                        "0");
+                                FirebaseDatabase.getInstance().getReference("user/" + userUid + "/chatrooms/" + chatRoom.getUid()).setValue(chatRoom);
                                 FirebaseDatabase.getInstance().getReference("chatRoom/" + chatRoomUid + "/users").push().setValue(userUid);
                                 Toast.makeText(ChatRoomEditorActivity.this, "Successfully added user to ChatRoom", Toast.LENGTH_SHORT).show();
                                 break;

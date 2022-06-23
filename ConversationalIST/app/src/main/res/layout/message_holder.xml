@@ -48,6 +48,15 @@
             android:padding="8dp"/>
 
         <TextView
+            android:id="@+id/txt_filename"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginHorizontal="5dp"
+            android:maxWidth="200dp"
+            android:padding="8dp"/>
+
+        <TextView
             android:id="@+id/txt_username_content"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

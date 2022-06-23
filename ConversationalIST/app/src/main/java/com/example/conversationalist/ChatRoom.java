@@ -10,13 +10,14 @@ public class ChatRoom {
     private String chatImage;
     private String uid;
     private String latitude,longitude,rad;
+    private String unread;
 
 
     public ChatRoom() {
 
     }
 
-    public ChatRoom(String type, String chatRoomId, ArrayList<String> usersId, ArrayList<Message> messages, String chatImage, String uid, String latitude, String longitude, String rad) {
+    public ChatRoom(String type, String chatRoomId, ArrayList<String> usersId, ArrayList<Message> messages, String chatImage, String uid, String latitude, String longitude, String rad, String unread) {
         this.type = type;
         this.chatRoomId = chatRoomId;
         this.users = usersId;
@@ -26,6 +27,15 @@ public class ChatRoom {
         this.latitude = latitude;
         this.longitude = longitude;
         this.rad = rad;
+        this.unread = unread;
+    }
+
+    public String getUnread() {
+        return unread;
+    }
+
+    public void setUnread(String unread) {
+        this.unread = unread;
     }
 
     public String getLatitude() {

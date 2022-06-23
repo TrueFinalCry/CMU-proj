@@ -159,6 +159,7 @@ public class FriendsActivity extends AppCompatActivity {
                         Toast.makeText(FriendsActivity.this, "Location permission denied " + chatRooms.get(position).getChatRoomId(), Toast.LENGTH_SHORT).show();
                     }
                 } else {
+
                     startActivity(new Intent(FriendsActivity.this, ChatRoomActivity.class)
                             // arguments of chatroom (1 user so far)
                             .putExtra("room_id", chatRooms.get(position).getChatRoomId())
@@ -255,7 +256,8 @@ public class FriendsActivity extends AppCompatActivity {
                             dataSnapshot.child("uid").getValue(String.class),
                             dataSnapshot.child("latitude").getValue(String.class),
                             dataSnapshot.child("longitude").getValue(String.class),
-                            dataSnapshot.child("rad").getValue(String.class)
+                            dataSnapshot.child("rad").getValue(String.class),
+                            dataSnapshot.child("unread").getValue(String.class)
                     );
                     if (chatRoom.getType().equals("geo-fenced")) {
                         if (!(ActivityCompat.checkSelfPermission(FriendsActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(FriendsActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
@@ -313,6 +315,7 @@ public class FriendsActivity extends AppCompatActivity {
                             chatRoomUid,
                             snapshot.child("latitude").getValue(String.class),
                             snapshot.child("longitude").getValue(String.class),
+                            snapshot.child("rad").getValue(String.class),
                             snapshot.child("rad").getValue(String.class));
                     for (DataSnapshot ds : snapshot.child("users").getChildren()) {
                         if (FirebaseAuth.getInstance().getCurrentUser().getUid().equals(ds.getValue(String.class))) {

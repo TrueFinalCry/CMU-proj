@@ -235,11 +235,11 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 btnSimpleLogIn.setVisibility(View.VISIBLE);
                 txtSingUpInfo.setVisibility(View.VISIBLE);
-                btnLogin.setVisibility(View.VISIBLE);
+                btnLogin.setVisibility(View.GONE);
                 btnSimpleSignUp.setVisibility(View.GONE);
                 txtLoginInfo.setVisibility(View.GONE);
                 btnSubmit.setVisibility(View.GONE);
-                btnGuest.setVisibility(View.GONE);
+                btnGuest.setVisibility(View.VISIBLE);
             }
         });
 
@@ -251,7 +251,7 @@ public class MainActivity extends AppCompatActivity {
                 btnLogin.setVisibility(View.GONE);
                 btnSimpleSignUp.setVisibility(View.VISIBLE);
                 txtLoginInfo.setVisibility(View.VISIBLE);
-                btnSubmit.setVisibility(View.VISIBLE);
+                btnSubmit.setVisibility(View.GONE);
                 btnGuest.setVisibility(View.VISIBLE);
             }
         });

@@ -41,7 +41,7 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ChatRo
     @Override
     public void onBindViewHolder(@NonNull ChatRoomAdapter.ChatRoomHolder holder, int position) {
         holder.txtUsername.setText(chatRooms.get(position).getChatRoomId());
-        if (chatRooms.get(position).getType().equals("private")) {
+        if (chatRooms.get(position).getUnread().equals("1")) {
             holder.notificationImg.setVisibility(View.VISIBLE);
         }
         Glide.with(context).load(chatRooms.get(position).getChatImage()).error(R.drawable.account_image).placeholder(R.drawable.account_image).into(holder.imageView);

@@ -99,7 +99,8 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
                                         dataSnapshot.getKey(),
                                         dataSnapshot.child("latitude").getValue(String.class),
                                         dataSnapshot.child("longitude").getValue(String.class),
-                                        dataSnapshot.child("rad").getValue(String.class));
+                                        dataSnapshot.child("rad").getValue(String.class),
+                                        dataSnapshot.child("unread").getValue(String.class));
 
                                 if (dataSnapshot.child("type").getValue(String.class).equals("public")) {
                                     for (DataSnapshot ds : dataSnapshot.child("users").getChildren()) {
@@ -109,7 +110,7 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
                                         }
                                     }
                                     Toast.makeText(ChatRoomCreatorActivity.this, "Successfully Registered in this ChatRoom", Toast.LENGTH_SHORT).show();
-                                    FirebaseDatabase.getInstance().getReference("user/" + FirebaseAuth.getInstance().getCurrentUser().getUid()).child("chatrooms").push().setValue(chatRoom);
+                                    FirebaseDatabase.getInstance().getReference("user/" + FirebaseAuth.getInstance().getCurrentUser().getUid() + "/chatrooms/" + chatRoom.getUid()).setValue(chatRoom);
                                     dataSnapshot.child("users").getRef().push().setValue(FirebaseAuth.getInstance().getCurrentUser().getUid());
                                     return;
                                 } else if (dataSnapshot.child("type").getValue(String.class).equals("private")) {
@@ -126,7 +127,7 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
                                         }
                                     }
                                     Toast.makeText(ChatRoomCreatorActivity.this, "Successfully Registered in this ChatRoom", Toast.LENGTH_SHORT).show();
-                                    FirebaseDatabase.getInstance().getReference("user/" + FirebaseAuth.getInstance().getCurrentUser().getUid()).child("chatrooms").push().setValue(chatRoom);
+                                    FirebaseDatabase.getInstance().getReference("user/" + FirebaseAuth.getInstance().getCurrentUser().getUid() + "/chatrooms/" + chatRoom.getUid()).setValue(chatRoom);
                                     dataSnapshot.child("users").getRef().push().setValue(FirebaseAuth.getInstance().getCurrentUser().getUid());
                                     return;
                                 }
@@ -171,7 +172,8 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
                                 "",
                                 txtLocationLat.getText().toString(),
                                 txtLocationLong.getText().toString(),
-                                txtRadius.getText().toString());
+                                txtRadius.getText().toString(),
+                                "0");
                         FirebaseDatabase.getInstance().getReference("chatRoom").push().setValue(chatRoom);
 
                         FirebaseDatabase.getInstance().getReference("chatRoom").addListenerForSingleValueEvent(new ValueEventListener() {
@@ -193,9 +195,10 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
                                                 dataSnapshot.getRef().getKey(),
                                                 txtLocationLat.getText().toString(),
                                                 txtLocationLong.getText().toString(),
-                                                txtRadius.getText().toString());
+                                                txtRadius.getText().toString(),
+                                                "0");
                                         FirebaseDatabase.getInstance().getReference("chatRoom/" + dataSnapshot.getRef().getKey() + "/uid").setValue(dataSnapshot.getRef().getKey());
-                                        FirebaseDatabase.getInstance().getReference("user/" + FirebaseAuth.getInstance().getCurrentUser().getUid()).child("chatrooms").push().setValue(chatRoom);
+                                        FirebaseDatabase.getInstance().getReference("user/" + FirebaseAuth.getInstance().getCurrentUser().getUid() + "/chatrooms/" + chatRoom.getUid()).setValue(chatRoom);
                                         //FirebaseDatabase.getInstance().getReference("chatRoom/"+txtChatRoom.getText().toString()+"/users").push().setValue(myUser);
                                         return;
                                     }
