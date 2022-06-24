@@ -51,4 +51,5 @@
     <string name="Error_password_not_updated">Erro de senha, não atualizado</string>
     <string name="Error_auth_failed">Erro na autenticação </string>
     <string name="Please_introduce_password">Por favor, introduza a senha</string>
+    <string name="ChatRoom_is_private">Sala de bate-papo é privada</string>
 </resources>

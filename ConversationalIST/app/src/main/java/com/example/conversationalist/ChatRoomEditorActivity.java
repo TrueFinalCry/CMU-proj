@@ -81,7 +81,6 @@ public class ChatRoomEditorActivity extends AppCompatActivity {
             btnRemove.setVisibility(View.GONE);
             btnAdd.setVisibility(View.GONE);
             txtUsername.setVisibility(View.GONE);
-            viewUsername.setVisibility(View.GONE);
         }
 
         btnLeaveChatRoom.setOnClickListener(new View.OnClickListener() {

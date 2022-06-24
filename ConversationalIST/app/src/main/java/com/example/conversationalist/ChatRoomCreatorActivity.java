@@ -118,16 +118,16 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
                                 if (dataSnapshot.child("type").getValue(String.class).equals("public")) {
                                     for (DataSnapshot ds : dataSnapshot.child("users").getChildren()) {
                                         if (FirebaseAuth.getInstance().getCurrentUser().getUid().equals(ds.getValue(String.class))) {
-                                            Toast.makeText(ChatRoomCreatorActivity.this, "Already Registered in this ChatRoom", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(ChatRoomCreatorActivity.this, String.format(ChatRoomCreatorActivity.this.getResources().getString(R.string.User_Already_Registered)), Toast.LENGTH_SHORT).show();
                                             return;
                                         }
                                     }
-                                    Toast.makeText(ChatRoomCreatorActivity.this, "Successfully Registered in this ChatRoom", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(ChatRoomCreatorActivity.this, String.format(ChatRoomCreatorActivity.this.getResources().getString(R.string.Successfully_added_user)), Toast.LENGTH_SHORT).show();
                                     FirebaseDatabase.getInstance().getReference("user/" + FirebaseAuth.getInstance().getCurrentUser().getUid() + "/chatrooms/" + chatRoom.getUid()).setValue(chatRoom);
                                     dataSnapshot.child("users").getRef().push().setValue(FirebaseAuth.getInstance().getCurrentUser().getUid());
                                     return;
                                 } else if (dataSnapshot.child("type").getValue(String.class).equals("private")) {
-                                    Toast.makeText(ChatRoomCreatorActivity.this, "This ChatRoom is private", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(ChatRoomCreatorActivity.this, String.format(ChatRoomCreatorActivity.this.getResources().getString(R.string.ChatRoom_is_private)), Toast.LENGTH_SHORT).show();
                                     return;
                                 } else if (dataSnapshot.child("type").getValue(String.class).equals("geo-fenced")) {
                                     // check localization
@@ -135,11 +135,11 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
                                     // Toast.makeText(ChatRoomCreatorActivity.this, "ChatRoom to far away", Toast.LENGTH_SHORT).show();
                                     for (DataSnapshot ds : dataSnapshot.child("users").getChildren()) {
                                         if (FirebaseAuth.getInstance().getCurrentUser().getUid().equals(ds.getValue(String.class))) {
-                                            Toast.makeText(ChatRoomCreatorActivity.this, "Already Registered in this ChatRoom", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(ChatRoomCreatorActivity.this, String.format(ChatRoomCreatorActivity.this.getResources().getString(R.string.User_Already_Registered)), Toast.LENGTH_SHORT).show();
                                             return;
                                         }
                                     }
-                                    Toast.makeText(ChatRoomCreatorActivity.this, "Successfully Registered in this ChatRoom", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(ChatRoomCreatorActivity.this, String.format(ChatRoomCreatorActivity.this.getResources().getString(R.string.Successfully_added_user)), Toast.LENGTH_SHORT).show();
                                     FirebaseDatabase.getInstance().getReference("user/" + FirebaseAuth.getInstance().getCurrentUser().getUid() + "/chatrooms/" + chatRoom.getUid()).setValue(chatRoom);
                                     dataSnapshot.child("users").getRef().push().setValue(FirebaseAuth.getInstance().getCurrentUser().getUid());
                                     return;

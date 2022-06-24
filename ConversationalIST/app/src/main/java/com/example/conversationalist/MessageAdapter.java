@@ -176,8 +176,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageH
             mapView = itemView.findViewById(R.id.mapView);
 
 
-            //mapView.onCreate(null);
-            //mapView.getMapAsync(this);
 
             fileImg.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -199,19 +197,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageH
                             getSystemService(Context.DOWNLOAD_SERVICE);
 
                     long req = downloadmanager.enqueue(request);
-                    /*
-                    try {
-                        downloadmanager.wait();
-                        Intent intent = new Intent(Intent.ACTION_VIEW);
-                        intent.setDataAndType(uri, "A/A");
-                    } catch (Exception e) {
-
-                    }
-
-                    fileName.setText("");
-                    */
-
-                    //
                 }
             });
 
