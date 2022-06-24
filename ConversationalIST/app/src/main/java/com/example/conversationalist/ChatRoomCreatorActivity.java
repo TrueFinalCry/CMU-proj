@@ -80,9 +80,9 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
         btnCreate = findViewById(R.id.createButton);
         btnJoin = findViewById(R.id.joinButton);
 
-        txtLocationLong.setVisibility(View.GONE);
-        txtLocationLat.setVisibility(View.GONE);
-        txtRadius.setVisibility(View.GONE);
+        txtLocationLong.setVisibility(View.INVISIBLE);
+        txtLocationLat.setVisibility(View.INVISIBLE);
+        txtRadius.setVisibility(View.INVISIBLE);
 
         location = "";
 
@@ -240,9 +240,9 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
             public void onClick(View v) {
                 type = "private";
 
-                txtLocationLat.setVisibility(View.GONE);
-                txtLocationLong.setVisibility(View.GONE);
-                txtRadius.setVisibility(View.GONE);
+                txtLocationLat.setVisibility(View.INVISIBLE);
+                txtLocationLong.setVisibility(View.INVISIBLE);
+                txtRadius.setVisibility(View.INVISIBLE);
                 arrowGeo.setVisibility(View.GONE);
                 arrowPublic.setVisibility(View.GONE);
                 arrowPrivate.setVisibility(View.VISIBLE);
@@ -254,9 +254,9 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
             public void onClick(View v) {
                 type = "public";
 
-                txtLocationLat.setVisibility(View.GONE);
-                txtLocationLong.setVisibility(View.GONE);
-                txtRadius.setVisibility(View.GONE);
+                txtLocationLat.setVisibility(View.INVISIBLE);
+                txtLocationLong.setVisibility(View.INVISIBLE);
+                txtRadius.setVisibility(View.INVISIBLE);
                 arrowGeo.setVisibility(View.GONE);
                 arrowPublic.setVisibility(View.VISIBLE);
                 arrowPrivate.setVisibility(View.GONE);
@@ -368,7 +368,6 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
 
                                     LocationServices.getFusedLocationProviderClient(ChatRoomCreatorActivity.this)
                                             .removeLocationUpdates(this);
-                                    Log.d("TAG1", "A");
                                     if (locationResult != null && locationResult.getLocations().size() >0){
 
                                         int index = locationResult.getLocations().size() - 1;

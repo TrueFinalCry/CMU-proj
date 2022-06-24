@@ -61,7 +61,7 @@
     <EditText
         android:id="@+id/edtText"
         android:layout_width="215dp"
-        android:layout_height="41dp"
+        android:layout_height="wrap_content"
         android:maxHeight="100dp"
         android:minHeight="45dp"
         app:layout_constraintBottom_toBottomOf="parent"

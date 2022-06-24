@@ -5,8 +5,10 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -27,6 +29,7 @@ import android.media.Image;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -170,6 +173,11 @@ public class ChatRoomActivity extends AppCompatActivity {
             public void onClick(View v) {
 
 
+                checkPermission(Manifest.permission.CAMERA, 100);
+
+                if (ContextCompat.checkSelfPermission(ChatRoomActivity.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED) {
+                    return;
+                }
                 Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
                     File photoFile = null;
@@ -272,6 +280,7 @@ public class ChatRoomActivity extends AppCompatActivity {
         });
 
         shareLocation.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.M)
             @Override
             public void onClick(View v) {
                 if (!(ActivityCompat.checkSelfPermission(ChatRoomActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(ChatRoomActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
@@ -291,6 +300,9 @@ public class ChatRoomActivity extends AppCompatActivity {
                                     }
                                 }
                             });
+                }
+                else {
+                    requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
                 }
             }
         });
@@ -510,6 +522,18 @@ public class ChatRoomActivity extends AppCompatActivity {
                 storageDir     /* directory */
         );
         return image;
+    }
+
+    public boolean checkPermission(String permission, int requestCode)
+    {
+        // Checking if permission is not granted
+        if (ContextCompat.checkSelfPermission(ChatRoomActivity.this, permission) == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(ChatRoomActivity.this, new String[] { permission }, requestCode);
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     public boolean isConnected() {

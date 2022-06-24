@@ -3,6 +3,7 @@ package com.example.conversationalist;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -56,14 +57,16 @@ public class ChatRoomEditorActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_chat_editor);
+
+            setContentView(R.layout.activity_chat_editor);
+
+
 
         chatRoomName = findViewById(R.id.chatRoomName);
         btnLeaveChatRoom = findViewById(R.id.btnLeaveChatRoom);
         btnAdd = findViewById(R.id.btnAdd);
         btnRemove = findViewById(R.id.btnRemove);
         txtUsername = findViewById(R.id.txtUsername);
-        viewUsername = findViewById(R.id.textView2);
 
         chatRoomId = getIntent().getStringExtra("room_id");
         chatRoomImage = getIntent().getStringExtra("room_image");
@@ -230,4 +233,5 @@ public class ChatRoomEditorActivity extends AppCompatActivity {
             }
         });
     }
+
 }
