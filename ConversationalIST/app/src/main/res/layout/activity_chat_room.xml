@@ -60,19 +60,19 @@
 
     <EditText
         android:id="@+id/edtText"
-        android:layout_width="250dp"
+        android:layout_width="215dp"
         android:layout_height="41dp"
         android:maxHeight="100dp"
         android:minHeight="45dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/imgSendMessage"
-        app:layout_constraintStart_toEndOf="@+id/share_file" />
+        app:layout_constraintStart_toEndOf="@+id/shareLocation" />
 
     <ImageView
         android:id="@+id/imgSendPhotos"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:src="@drawable/add_photos"
+        android:src="@drawable/ic_baseline_camera_alt_24"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -99,6 +99,14 @@
         android:src="@drawable/send_image"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <ImageView
+        android:id="@+id/shareLocation"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/share_file"
+        app:srcCompat="@drawable/location_share" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

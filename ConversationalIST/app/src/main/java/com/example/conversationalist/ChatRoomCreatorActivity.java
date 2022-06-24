@@ -8,6 +8,7 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
@@ -15,6 +16,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -45,13 +47,14 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 
 public class ChatRoomCreatorActivity extends AppCompatActivity {
-    private Button btnPublic, btnPrivate, btnGeo, btnCreate, btnJoin;
+    private Button btnPublic, btnPrivate, btnGeo, btnCreate, btnJoin, btnMaps;
     private EditText txtChatRoomName, txtLocationLat,txtLocationLong, txtRadius;
     private String location;
     private String type;
     private LocationRequest locationRequest;
     private double longitude, latitude, rad;
     private FusedLocationProviderClient fusedLocationClient;
+    private ImageView arrowPublic, arrowPrivate ,arrowGeo;
 
 
     @Override
@@ -63,6 +66,12 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
         txtChatRoomName = findViewById(R.id.chatRoomName);
         txtLocationLat = findViewById(R.id.txtLocationLat);
         txtLocationLong = findViewById(R.id.txtLocationLong);
+
+        btnMaps = findViewById(R.id.btnMaps);
+
+        arrowPublic = findViewById(R.id.arrowPublic);
+        arrowPrivate = findViewById(R.id.arrowPrivate);
+        arrowGeo = findViewById(R.id.arrowGeo);
 
         txtRadius = findViewById(R.id.txtRadius);
         btnPublic = findViewById(R.id.publicButton);
@@ -78,6 +87,10 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
         location = "";
 
         type = "public";
+
+        arrowGeo.setVisibility(View.GONE);
+        arrowPrivate.setVisibility(View.GONE);
+        btnMaps.setVisibility(View.GONE);
 
 
         btnJoin.setOnClickListener(new View.OnClickListener() {
@@ -230,6 +243,10 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
                 txtLocationLat.setVisibility(View.GONE);
                 txtLocationLong.setVisibility(View.GONE);
                 txtRadius.setVisibility(View.GONE);
+                arrowGeo.setVisibility(View.GONE);
+                arrowPublic.setVisibility(View.GONE);
+                arrowPrivate.setVisibility(View.VISIBLE);
+                btnMaps.setVisibility(View.GONE);
             }
         });
         btnPublic.setOnClickListener(new View.OnClickListener() {
@@ -240,6 +257,10 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
                 txtLocationLat.setVisibility(View.GONE);
                 txtLocationLong.setVisibility(View.GONE);
                 txtRadius.setVisibility(View.GONE);
+                arrowGeo.setVisibility(View.GONE);
+                arrowPublic.setVisibility(View.VISIBLE);
+                arrowPrivate.setVisibility(View.GONE);
+                btnMaps.setVisibility(View.GONE);
 
             }
         });
@@ -254,6 +275,10 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
                 txtLocationLat.setVisibility(View.VISIBLE);
                 txtLocationLong.setVisibility(View.VISIBLE);
                 txtRadius.setVisibility(View.VISIBLE);
+                arrowGeo.setVisibility(View.VISIBLE);
+                arrowPublic.setVisibility(View.GONE);
+                arrowPrivate.setVisibility(View.GONE);
+                btnMaps.setVisibility(View.VISIBLE);
 
                 if (!(ActivityCompat.checkSelfPermission(ChatRoomCreatorActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(ChatRoomCreatorActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
                     fusedLocationClient.getLastLocation()
@@ -279,6 +304,18 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
                 //getCurrentLocation();
 
 
+            }
+        });
+
+        btnMaps.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Uri gmmIntentUri = Uri.parse("geo:37.7749,-122.4194");
+                Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                mapIntent.setPackage("com.google.android.apps.maps");
+                if (mapIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(mapIntent);
+                }
             }
         });
 

@@ -7,13 +7,16 @@ public class Message {
     private String username;
     private String file;
     private String date;
+    private String lat;
+    private String longitude;
+
     // private string reactions
 
     public Message() {
     }
 
 
-    public Message(String sender, String senderImg, String content, String imageContent, String chatRoomId, String username, String file, String date) {
+    public Message(String sender, String senderImg, String content, String imageContent, String chatRoomId, String username, String file, String date, String lat, String longitude) {
         this.sender = sender;
         this.content = content;
         this.imageContent = imageContent;
@@ -22,6 +25,24 @@ public class Message {
         this.senderImg = senderImg;
         this.username = username;
         this.date = date;
+        this.lat = lat;
+        this.longitude = longitude;
+    }
+
+    public String getLat() {
+        return lat;
+    }
+
+    public void setLat(String lat) {
+        this.lat = lat;
+    }
+
+    public String getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(String longitude) {
+        this.longitude = longitude;
     }
 
     public String getDate() {

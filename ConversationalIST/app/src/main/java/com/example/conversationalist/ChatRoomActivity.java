@@ -57,8 +57,10 @@ import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.UUID;
 
 import javax.xml.transform.Result;
@@ -69,12 +71,13 @@ public class ChatRoomActivity extends AppCompatActivity {
     private EditText edtMessageInput;
     private TextView txtChattingWith;
     private ProgressBar progressBar;
-    private ImageView chatIcon,imgSend,imgSendPhotos, shareRoomLink,shareFile;
+    private ImageView chatIcon,imgSend,imgSendPhotos, shareRoomLink,shareFile, shareLocation;
     private Uri imagePath;
     private Uri filePath;
     private Uri imageUri;
     private String ImageToSend, fileToSend;
     static final int REQUEST_IMAGE_CAPTURE = 1;
+    private String latitude, longitude;
 
     private ArrayList<Message> messages;
     private FusedLocationProviderClient fusedLocationClient;
@@ -112,10 +115,13 @@ public class ChatRoomActivity extends AppCompatActivity {
         txtChattingWith = findViewById(R.id.txtChattingWith);
         chatIcon = findViewById(R.id.small_chatroom_img);
         imgSendPhotos = findViewById(R.id.imgSendPhotos);
+        shareLocation = findViewById(R.id.shareLocation);
 
         txtChattingWith.setText(chatRoomId);
         messages = new ArrayList<>();
         ImageToSend = "";
+        latitude = "";
+        longitude = "";
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -163,31 +169,55 @@ public class ChatRoomActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+
+                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                    File photoFile = null;
+                    try {
+                        photoFile = createImageFile(ChatRoomActivity.this);
+
+                    } catch (IOException ex) {
+                    }
+
+                    if (photoFile != null) {
+                        imagePath = FileProvider.getUriForFile(ChatRoomActivity.this, getApplicationContext().getPackageName() + ".provider",
+                                photoFile);
+                        deleteFile(photoFile.getName());
+                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, imagePath);
+                        LaunchImageChooserActivity.launch(takePictureIntent);
+                        photoFile.deleteOnExit();
+                    }
+                }
+
+                /*
+                Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+
+                try {
+                    LaunchChooserActivity.launch(gallery);
+                } catch (ActivityNotFoundException e) {
+                    // display error state to the user
+                }
+
                 Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,imageUri);
 
                 try {
                     LaunchImageChooserActivity.launch(takePictureIntent);
                 } catch (ActivityNotFoundException e) {
                     // display error state to the user
                 }
+                */
+
+
             }
 
             ActivityResultLauncher<Intent> LaunchImageChooserActivity = registerForActivityResult(
                     new ActivityResultContracts.StartActivityForResult(),
                     result -> {
-                        Log.d("AAAAAAAAAA", String.valueOf(result.getResultCode()));
                         if (result.getResultCode() == Activity.RESULT_OK) {
                             Intent data = result.getData();
-                            Log.d("AAAAAAAAAA", String.valueOf(data.getData()));
                             if (data != null && data.getData() != null) {
-                                File folder = new File(Environment.getExternalStorageDirectory().toString()+"/ImagesFolder/");
-                                folder.mkdirs();
-                                imagePath = FileProvider.getUriForFile(ChatRoomActivity.this, getApplicationContext().getPackageName() + ".provider", new File(Environment.getExternalStorageDirectory().toString()+"/ImagesFolder/image.jpg"));
                                 imagePath = data.getData();
-                                Log.d("AAAAAAAAAA", imagePath.toString());
-                                getImageInImageView();
                             }
 
                         }
@@ -241,13 +271,36 @@ public class ChatRoomActivity extends AppCompatActivity {
             }
         });
 
+        shareLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!(ActivityCompat.checkSelfPermission(ChatRoomActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(ChatRoomActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
+                    fusedLocationClient.getLastLocation()
+                            .addOnSuccessListener(ChatRoomActivity.this, new OnSuccessListener<Location>() {
+                                @Override
+                                public void onSuccess(Location location) {
+                                    // Got last known location. In some rare situations this can be null.
+                                    if (location != null) {
+                                        longitude = ""+location.getLongitude();
+                                        latitude =  ""+location.getLatitude();
+                                        Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, "https://www.google.com/maps/@" + latitude + "," + longitude + ",15z", "", chatRoomId, myUsername, "", Calendar.getInstance().getTime().toString().substring(0,Calendar.getInstance().getTime().toString().length()-4), latitude, longitude);
+                                        FirebaseDatabase.getInstance().getReference("chatRoom/" + chatRoomUid).child("messages").push().setValue(myMessage);
+                                        sendNotification();
+                                        longitude = "";
+                                        latitude =  "";
+                                    }
+                                }
+                            });
+                }
+            }
+        });
+
 
         messageAdapter = new MessageAdapter(messages, ChatRoomActivity.this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(messageAdapter);
         // maybe need toolbar
         Glide.with(ChatRoomActivity.this).load(chatRoomImage).placeholder(R.drawable.account_image).error(R.drawable.account_image).into(chatIcon);
-
         attachMessageListener(chatRoomId);
         //setUpChatRoom();
     }
@@ -336,7 +389,7 @@ public class ChatRoomActivity extends AppCompatActivity {
                                                         public void onComplete(@NonNull Task<Uri> task) {
                                                             if (task.isSuccessful()) {
                                                                 fileToSend = task.getResult().toString();
-                                                                Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), ImageToSend, chatRoomId, myUsername, fileToSend, Calendar.getInstance().getTime().toString().substring(0,Calendar.getInstance().getTime().toString().length()-4));
+                                                                Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), ImageToSend, chatRoomId, myUsername, fileToSend, Calendar.getInstance().getTime().toString().substring(0,Calendar.getInstance().getTime().toString().length()-4),latitude, longitude);
                                                                 snapshot.child("messages").getRef().push().setValue(myMessage);
                                                                 sendNotification();
                                                                 filePath = null;
@@ -360,7 +413,7 @@ public class ChatRoomActivity extends AppCompatActivity {
                                         });
                                     }
                                     else {
-                                        Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), ImageToSend, chatRoomId, myUsername, "", Calendar.getInstance().getTime().toString().substring(0,Calendar.getInstance().getTime().toString().length()-4));
+                                        Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), ImageToSend, chatRoomId, myUsername, "", Calendar.getInstance().getTime().toString().substring(0,Calendar.getInstance().getTime().toString().length()-4), latitude, longitude);
                                         snapshot.child("messages").getRef().push().setValue(myMessage);
                                         sendNotification();
                                         imagePath = null;
@@ -393,7 +446,7 @@ public class ChatRoomActivity extends AppCompatActivity {
                                 public void onComplete(@NonNull Task<Uri> task) {
                                     if (task.isSuccessful()) {
                                         String fileToSend = task.getResult().toString();
-                                        Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), "", chatRoomId, myUsername, fileToSend, Calendar.getInstance().getTime().toString().substring(0,Calendar.getInstance().getTime().toString().length()-4));
+                                        Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), "", chatRoomId, myUsername, fileToSend, Calendar.getInstance().getTime().toString().substring(0,Calendar.getInstance().getTime().toString().length()-4), latitude, longitude);
                                         snapshot.child("messages").getRef().push().setValue(myMessage);
                                         sendNotification();
                                         filePath = null;
@@ -417,7 +470,7 @@ public class ChatRoomActivity extends AppCompatActivity {
             }
             else {
                 progressDialog.dismiss();
-                Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), "", chatRoomId, myUsername, "", Calendar.getInstance().getTime().toString().substring(0,Calendar.getInstance().getTime().toString().length()-4));
+                Message myMessage = new Message(FirebaseAuth.getInstance().getCurrentUser().getUid(), myImage, edtMessageInput.getText().toString(), "", chatRoomId, myUsername, "", Calendar.getInstance().getTime().toString().substring(0,Calendar.getInstance().getTime().toString().length()-4), latitude, longitude);
                 snapshot.child("messages").getRef().push().setValue(myMessage);
                 sendNotification();
                 edtMessageInput.setText("");
@@ -444,6 +497,19 @@ public class ChatRoomActivity extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError error) {
             }
         });
+    }
+
+    public static File createImageFile(Context context) throws IOException {
+        // Create an image file name
+        String imageFileName = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        File storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+                ;
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir     /* directory */
+        );
+        return image;
     }
 
     public boolean isConnected() {

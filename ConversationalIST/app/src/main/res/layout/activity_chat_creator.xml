@@ -117,4 +117,43 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.833" />
+
+    <Button
+        android:id="@+id/btnMaps"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/maps"
+        app:layout_constraintBottom_toBottomOf="@+id/privateButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.6"
+        app:layout_constraintStart_toEndOf="@+id/privateButton"
+        app:layout_constraintTop_toBottomOf="@+id/publicButton"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <ImageView
+        android:id="@+id/arrowPublic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/publicButton"
+        app:layout_constraintEnd_toStartOf="@+id/publicButton"
+        app:layout_constraintTop_toTopOf="@+id/publicButton"
+        app:srcCompat="@drawable/send_image" />
+
+    <ImageView
+        android:id="@+id/arrowPrivate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/privateButton"
+        app:layout_constraintEnd_toStartOf="@+id/privateButton"
+        app:layout_constraintTop_toTopOf="@+id/privateButton"
+        app:srcCompat="@drawable/send_image" />
+
+    <ImageView
+        android:id="@+id/arrowGeo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/geoButton"
+        app:layout_constraintEnd_toStartOf="@+id/geoButton"
+        app:layout_constraintTop_toBottomOf="@+id/privateButton"
+        app:srcCompat="@drawable/send_image" />
 </androidx.constraintlayout.widget.ConstraintLayout>
