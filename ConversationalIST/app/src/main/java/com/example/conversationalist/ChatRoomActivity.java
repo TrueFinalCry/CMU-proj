@@ -260,13 +260,13 @@ public class ChatRoomActivity extends AppCompatActivity {
                                                     if (Double.parseDouble(chatRoomRad) > Math.sqrt(((Double.parseDouble(chatRoomLong)) - longitude) * ((Double.parseDouble(chatRoomLong) - longitude) + ((Double.parseDouble(chatRoomLat) - latitude) * ((Double.parseDouble(chatRoomLat) - latitude)))))) {
                                                         sendMessage(snapshot);
                                                     } else {
-                                                        Toast.makeText(ChatRoomActivity.this, "Locations permission denied", Toast.LENGTH_SHORT).show();
+                                                        Toast.makeText(ChatRoomActivity.this, String.format(ChatRoomActivity.this.getResources().getString(R.string.locations_permission_denied)), Toast.LENGTH_SHORT).show();
                                                     }
                                                 }
                                             }
                                         });
                             } else {
-                                Toast.makeText(ChatRoomActivity.this, "Locations permission denied", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(ChatRoomActivity.this, String.format(ChatRoomActivity.this.getResources().getString(R.string.locations_permission_denied)), Toast.LENGTH_SHORT).show();
                             }
                         } else {
                             sendMessage(snapshot);
@@ -410,7 +410,7 @@ public class ChatRoomActivity extends AppCompatActivity {
                                                             }
                                                         }
                                                     });
-                                                    Toast.makeText(ChatRoomActivity.this, "Uploaded successfully", Toast.LENGTH_SHORT).show();
+                                                    Toast.makeText(ChatRoomActivity.this, String.format(ChatRoomActivity.this.getResources().getString(R.string.Uploaded_successfully)), Toast.LENGTH_SHORT).show();
                                                 } else {
                                                     Toast.makeText(ChatRoomActivity.this, task.getException().getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                                                 }
@@ -420,7 +420,7 @@ public class ChatRoomActivity extends AppCompatActivity {
                                             @Override
                                             public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
                                                 double progress = 100.0 * snapshot.getBytesTransferred() / snapshot.getTotalByteCount();
-                                                progressDialog.setMessage(" Uploaded " + (int) progress + "%");
+                                                progressDialog.setMessage(String.format(ChatRoomActivity.this.getResources().getString(R.string.Uploaded)) + (int) progress + "%");
                                             }
                                         });
                                     }
@@ -434,7 +434,7 @@ public class ChatRoomActivity extends AppCompatActivity {
                                 }
                             }
                         });
-                        Toast.makeText(ChatRoomActivity.this, "Uploaded successfully", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ChatRoomActivity.this, String.format(ChatRoomActivity.this.getResources().getString(R.string.Uploaded_successfully)), Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(ChatRoomActivity.this, task.getException().getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                     }
@@ -444,7 +444,7 @@ public class ChatRoomActivity extends AppCompatActivity {
                 @Override
                 public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
                     double progress = 100.0 * snapshot.getBytesTransferred() / snapshot.getTotalByteCount();
-                    progressDialog.setMessage(" Uploaded "+(int) progress + "%");
+                    progressDialog.setMessage(String.format(ChatRoomActivity.this.getResources().getString(R.string.Uploaded))+(int) progress + "%");
                 }
             });
         } else {
@@ -466,7 +466,7 @@ public class ChatRoomActivity extends AppCompatActivity {
                                     }
                                 }
                             });
-                            Toast.makeText(ChatRoomActivity.this, "Uploaded successfully", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ChatRoomActivity.this, String.format(ChatRoomActivity.this.getResources().getString(R.string.Uploaded_successfully)), Toast.LENGTH_SHORT).show();
                         } else {
                             Toast.makeText(ChatRoomActivity.this, task.getException().getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                         }
@@ -476,7 +476,7 @@ public class ChatRoomActivity extends AppCompatActivity {
                     @Override
                     public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
                         double progress = 100.0 * snapshot.getBytesTransferred() / snapshot.getTotalByteCount();
-                        progressDialog.setMessage(" Uploaded " + (int) progress + "%");
+                        progressDialog.setMessage(String.format(ChatRoomActivity.this.getResources().getString(R.string.Uploaded)) + (int) progress + "%");
                     }
                 });
             }

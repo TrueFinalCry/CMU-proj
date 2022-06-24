@@ -84,10 +84,10 @@ public class MainActivity extends AppCompatActivity {
 
                 if (edtEmail.getText().toString().isEmpty() || edtPassword.getText().toString().isEmpty() || edtUsername.getText().toString().isEmpty()) {
                     if (isSigningUp && edtUsername.getText().toString().isEmpty()) {
-                        Toast.makeText(MainActivity.this, "Invalid input", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, String.format(MainActivity.this.getResources().getString(R.string.Invalid_input)), Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    Toast.makeText(MainActivity.this, "Invalid input", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, String.format(MainActivity.this.getResources().getString(R.string.Invalid_input)), Toast.LENGTH_SHORT).show();
                     return;
 
                 }
@@ -102,10 +102,10 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (edtEmail.getText().toString().isEmpty() || edtPassword.getText().toString().isEmpty() || edtUsername.getText().toString().isEmpty()) {
                     if (isSigningUp && edtUsername.getText().toString().isEmpty()) {
-                        Toast.makeText(MainActivity.this, "Invalid input", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, String.format(MainActivity.this.getResources().getString(R.string.Invalid_input)), Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    Toast.makeText(MainActivity.this, "Invalid input", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, String.format(MainActivity.this.getResources().getString(R.string.Invalid_input)), Toast.LENGTH_SHORT).show();
                     return;
                 }
                 handleLogin();
@@ -117,10 +117,10 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (edtPassword.getText().toString().isEmpty() || edtUsername.getText().toString().isEmpty()) {
                     if (isSigningUp && edtUsername.getText().toString().isEmpty()) {
-                        Toast.makeText(MainActivity.this, "Invalid input", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, String.format(MainActivity.this.getResources().getString(R.string.Invalid_input)), Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    Toast.makeText(MainActivity.this, "Invalid input", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, String.format(MainActivity.this.getResources().getString(R.string.Invalid_input)), Toast.LENGTH_SHORT).show();
                     return;
                 }
                 FirebaseAuth.getInstance().signInWithEmailAndPassword(edtUsername.getText().toString() + "@conversationalist-3003c.com", edtPassword.getText().toString()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
                         if(task.isSuccessful()) {
                             startActivity(new Intent(MainActivity.this, FriendsActivity.class)
                             );
-                            Toast.makeText(MainActivity.this, "Logged in successfully", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.this, String.format(MainActivity.this.getResources().getString(R.string.Logged_in_successfully)), Toast.LENGTH_SHORT).show();
                         } else {
                             Toast.makeText(MainActivity.this, task.getException().getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                         }
@@ -141,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
         btnSimpleSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!edtUsername.equals("")) {
+                if (!edtUsername.getText().toString().isEmpty()) {
                     FirebaseDatabase.getInstance().getReference("user").addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -151,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
                                 String username = dataSnapshot.child("username").getValue(String.class);
                                 if (edtUsername.getText().toString().equals(username)) {
                                     i = false;
-                                    Toast.makeText(MainActivity.this, "Username already in use", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(MainActivity.this, String.format(MainActivity.this.getResources().getString(R.string.Username_already_in_use)), Toast.LENGTH_SHORT).show();
                                 }
                             }
                             if (i) {
@@ -162,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
                                             FirebaseDatabase.getInstance().getReference("user/"+ FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(new User(edtUsername.getText().toString(), edtEmail.getText().toString(), ""));
                                             startActivity(new Intent(MainActivity.this, FriendsActivity.class)
                                             );
-                                            Toast.makeText(MainActivity.this, "Signed up successfully", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(MainActivity.this, String.format(MainActivity.this.getResources().getString(R.string.Signed_up_successfully)), Toast.LENGTH_SHORT).show();
                                         } else {
                                             Toast.makeText(MainActivity.this, task.getException().getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                                         }
@@ -175,6 +175,8 @@ public class MainActivity extends AppCompatActivity {
 
                         }
                     });
+                } else {
+                    Toast.makeText(MainActivity.this, String.format(MainActivity.this.getResources().getString(R.string.Invalid_input)), Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -186,10 +188,10 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (edtUsername.getText().toString().isEmpty()) {
                     if (isSigningUp && edtUsername.getText().toString().isEmpty()) {
-                        Toast.makeText(MainActivity.this, "Invalid input", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, String.format(MainActivity.this.getResources().getString(R.string.Invalid_input)), Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    Toast.makeText(MainActivity.this, "Invalid input", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, String.format(MainActivity.this.getResources().getString(R.string.Invalid_input)), Toast.LENGTH_SHORT).show();
                     return;
                 }
                 FirebaseDatabase.getInstance().getReference("user").addListenerForSingleValueEvent(new ValueEventListener() {
@@ -201,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
                             String username = dataSnapshot.child("username").getValue(String.class);
                             if (edtUsername.getText().toString().equals(username)) {
                                 i = false;
-                                Toast.makeText(MainActivity.this, "Username already in use", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(MainActivity.this, String.format(MainActivity.this.getResources().getString(R.string.Username_already_in_use)), Toast.LENGTH_SHORT).show();
                             }
                         }
                         if (i) {
@@ -214,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
                                         startActivity(new Intent(MainActivity.this, FriendsActivity.class)
                                                 .putExtra("password", currPassword)
                                         );
-                                        Toast.makeText(MainActivity.this, "Signed up successfully", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(MainActivity.this, String.format(MainActivity.this.getResources().getString(R.string.Signed_up_successfully)), Toast.LENGTH_SHORT).show();
                                     } else {
                                         Toast.makeText(MainActivity.this, task.getException().getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                                     }
@@ -267,7 +269,7 @@ public class MainActivity extends AppCompatActivity {
                     String username = dataSnapshot.child("username").getValue(String.class);
                     if (edtUsername.getText().toString().equals(username)) {
                         i = false;
-                        Toast.makeText(MainActivity.this, "Username already in use", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, String.format(MainActivity.this.getResources().getString(R.string.Username_already_in_use)), Toast.LENGTH_SHORT).show();
                     }
                 }
                 if (i) {
@@ -278,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
                                 FirebaseDatabase.getInstance().getReference("user/"+ FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(new User(edtUsername.getText().toString(), edtEmail.getText().toString(), ""));
                                 startActivity(new Intent(MainActivity.this, FriendsActivity.class)
                                 );
-                                Toast.makeText(MainActivity.this, "Signed up successfully", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(MainActivity.this, String.format(MainActivity.this.getResources().getString(R.string.Signed_up_successfully)), Toast.LENGTH_SHORT).show();
                             } else {
                                 Toast.makeText(MainActivity.this, task.getException().getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                             }
@@ -300,7 +302,7 @@ public class MainActivity extends AppCompatActivity {
                 if(task.isSuccessful()) {
                     startActivity(new Intent(MainActivity.this, FriendsActivity.class)
                     );
-                    Toast.makeText(MainActivity.this, "Logged in successfully", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, String.format(MainActivity.this.getResources().getString(R.string.Logged_in_successfully)), Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(MainActivity.this, task.getException().getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                 }

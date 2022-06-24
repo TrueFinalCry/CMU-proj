@@ -171,7 +171,7 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
                         for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                             String roomId = dataSnapshot.child("chatRoomId").getValue(String.class);
                             if (txtChatRoomName.getText().toString().equals(roomId)) {
-                                Toast.makeText(ChatRoomCreatorActivity.this, "ChatRoom already exists", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(ChatRoomCreatorActivity.this, String.format(ChatRoomCreatorActivity.this.getResources().getString(R.string.ChatRoom_already_exists)), Toast.LENGTH_SHORT).show();
                                 return;
                             }
                         }
@@ -223,7 +223,7 @@ public class ChatRoomCreatorActivity extends AppCompatActivity {
 
                             }
                         });
-                        Toast.makeText(ChatRoomCreatorActivity.this, "Successfully created ChatRoom", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ChatRoomCreatorActivity.this, String.format(ChatRoomCreatorActivity.this.getResources().getString(R.string.Successfully_created_ChatRoom)), Toast.LENGTH_SHORT).show();
                     }
 
                     @Override

@@ -146,7 +146,8 @@ public class Profile extends AppCompatActivity {
             public void onClick(View v) {
 
                 if (edtPassword.getText().toString().isEmpty()) {
-                    Toast.makeText(Profile.this, "Please introduce password", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Profile.this, String.format(Profile.this.getResources().getString(R.string.Please_introduce_password)), Toast.LENGTH_SHORT).show();
+                    return;
                 }
                 AuthCredential credential = EmailAuthProvider
                         .getCredential(FirebaseAuth.getInstance().getCurrentUser().getEmail(), currPassword);
@@ -163,14 +164,14 @@ public class Profile extends AppCompatActivity {
                                                 currPassword = "";
                                                 edtPassword.setVisibility(View.GONE);
                                                 btnUpgrade.setVisibility(View.GONE);
-                                                Toast.makeText(Profile.this, "Password updated", Toast.LENGTH_SHORT).show();
+                                                Toast.makeText(Profile.this, String.format(Profile.this.getResources().getString(R.string.Password_updated)), Toast.LENGTH_SHORT).show();
                                             } else {
-                                                Toast.makeText(Profile.this, "Error password not updated", Toast.LENGTH_SHORT).show();
+                                                Toast.makeText(Profile.this, String.format(Profile.this.getResources().getString(R.string.Error_password_not_updated)), Toast.LENGTH_SHORT).show();
                                             }
                                         }
                                     });
                                 } else {
-                                    Toast.makeText(Profile.this, "Error auth failed", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(Profile.this, String.format(Profile.this.getResources().getString(R.string.Error_auth_failed)), Toast.LENGTH_SHORT).show();
                                 }
                             }
                         });
@@ -197,7 +198,7 @@ public class Profile extends AppCompatActivity {
                                 }
                             }
                         });
-                        Toast.makeText(Profile.this, "Uploaded successfully", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(Profile.this, String.format(Profile.this.getResources().getString(R.string.Uploaded_successfully)), Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(Profile.this, task.getException().getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                     }
@@ -207,7 +208,7 @@ public class Profile extends AppCompatActivity {
                 @Override
                 public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
                     double progress = 100.0 * snapshot.getBytesTransferred() / snapshot.getTotalByteCount();
-                    progressDialog.setMessage(" Uploaded "+(int) progress + "%");
+                    progressDialog.setMessage(String.format(Profile.this.getResources().getString(R.string.Uploaded))+" "+(int) progress + "%");
                 }
             });
         } else {

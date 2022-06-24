@@ -154,17 +154,17 @@ public class FriendsActivity extends AppCompatActivity {
                                                         .putExtra("chat_room_uid", chatRooms.get(position).getUid())
 
                                                 );
-                                                Toast.makeText(FriendsActivity.this, "Selected chatroom " + chatRooms.get(position).getChatRoomId(), Toast.LENGTH_SHORT).show();
+                                                Toast.makeText(FriendsActivity.this, String.format(FriendsActivity.this.getResources().getString(R.string.Selected_chatroom))+ " " + chatRooms.get(position).getChatRoomId(), Toast.LENGTH_SHORT).show();
                                             }
                                             else {
-                                                Toast.makeText(FriendsActivity.this, "Outside of radius for chatroom " + chatRooms.get(position).getChatRoomId(), Toast.LENGTH_SHORT).show();
+                                                Toast.makeText(FriendsActivity.this, String.format(FriendsActivity.this.getResources().getString(R.string.Outside_of_radius_for_chatroom)) + " " + chatRooms.get(position).getChatRoomId(), Toast.LENGTH_SHORT).show();
 
                                             }
                                         }
                                     }
                                 });
                     } else {
-                        Toast.makeText(FriendsActivity.this, "Location permission denied " + chatRooms.get(position).getChatRoomId(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(FriendsActivity.this, String.format(FriendsActivity.this.getResources().getString(R.string.locations_permission_denied)) + chatRooms.get(position).getChatRoomId(), Toast.LENGTH_SHORT).show();
                     }
                 } else {
 
@@ -181,7 +181,7 @@ public class FriendsActivity extends AppCompatActivity {
                             .putExtra("chat_room_uid", chatRooms.get(position).getUid())
 
                     );
-                    Toast.makeText(FriendsActivity.this, "Selected chatroom " + chatRooms.get(position).getChatRoomId(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(FriendsActivity.this, String.format(FriendsActivity.this.getResources().getString(R.string.Selected_chatroom)) + " " + chatRooms.get(position).getChatRoomId(), Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -327,11 +327,11 @@ public class FriendsActivity extends AppCompatActivity {
                             snapshot.child("rad").getValue(String.class));
                     for (DataSnapshot ds : snapshot.child("users").getChildren()) {
                         if (FirebaseAuth.getInstance().getCurrentUser().getUid().equals(ds.getValue(String.class))) {
-                            Toast.makeText(FriendsActivity.this, "Already Registered in this ChatRoom", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(FriendsActivity.this, String.format(FriendsActivity.this.getResources().getString(R.string.User_Already_Registered)), Toast.LENGTH_SHORT).show();
                             return;
                         }
                     }
-                    Toast.makeText(FriendsActivity.this, "Successfully Registered in this ChatRoom", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(FriendsActivity.this, String.format(FriendsActivity.this.getResources().getString(R.string.Successfully_added_user)), Toast.LENGTH_SHORT).show();
                     FirebaseDatabase.getInstance().getReference("user/" + FirebaseAuth.getInstance().getCurrentUser().getUid()).child("chatrooms").push().setValue(chatRoom);
                     snapshot.child("users").getRef().push().setValue(FirebaseAuth.getInstance().getCurrentUser().getUid());
                 }

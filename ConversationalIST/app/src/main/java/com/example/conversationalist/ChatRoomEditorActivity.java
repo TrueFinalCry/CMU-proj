@@ -137,7 +137,7 @@ public class ChatRoomEditorActivity extends AppCompatActivity {
                             if(Objects.equals(dataSnapshot.child("username").getValue(String.class), txtUsername.getText().toString())) {
                                 userUid = dataSnapshot.getKey();
                                 if(userUid.equals(FirebaseAuth.getInstance().getUid())) {
-                                    Toast.makeText(ChatRoomEditorActivity.this, "Use the Leave Button to remove yourself from the ChatRoom", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(ChatRoomEditorActivity.this, String.format(ChatRoomEditorActivity.this.getResources().getString(R.string.Use_Leave_Button)), Toast.LENGTH_SHORT).show();
                                     return;
                                 }
 
@@ -156,7 +156,7 @@ public class ChatRoomEditorActivity extends AppCompatActivity {
                                                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                                                     if(dataSnapshot.child("uid").getValue(String.class).equals(chatRoomUid)) {
                                                         dataSnapshot.getRef().removeValue();
-                                                        Toast.makeText(ChatRoomEditorActivity.this, "Successfully removed user from ChatRoom", Toast.LENGTH_SHORT).show();
+                                                        Toast.makeText(ChatRoomEditorActivity.this, String.format(ChatRoomEditorActivity.this.getResources().getString(R.string.Successfully_removed_user)), Toast.LENGTH_SHORT).show();
                                                         return;
                                                     }
                                                 }
@@ -200,7 +200,7 @@ public class ChatRoomEditorActivity extends AppCompatActivity {
                                 userUid = dataSnapshot.getKey();
                                 for (DataSnapshot ds : dataSnapshot.child("chatrooms").getChildren()) {
                                     if (chatRoomUid.equals(ds.child("uid").getValue(String.class))) {
-                                        Toast.makeText(ChatRoomEditorActivity.this, "User Already Registered in this ChatRoom", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(ChatRoomEditorActivity.this, String.format(ChatRoomEditorActivity.this.getResources().getString(R.string.User_Already_Registered)), Toast.LENGTH_SHORT).show();
                                         return;
                                     }
                                 }
@@ -218,7 +218,7 @@ public class ChatRoomEditorActivity extends AppCompatActivity {
                                         "0");
                                 FirebaseDatabase.getInstance().getReference("user/" + userUid + "/chatrooms/" + chatRoom.getUid()).setValue(chatRoom);
                                 FirebaseDatabase.getInstance().getReference("chatRoom/" + chatRoomUid + "/users").push().setValue(userUid);
-                                Toast.makeText(ChatRoomEditorActivity.this, "Successfully added user to ChatRoom", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(ChatRoomEditorActivity.this, String.format(ChatRoomEditorActivity.this.getResources().getString(R.string.Successfully_added_user)), Toast.LENGTH_SHORT).show();
                                 break;
                             }
                         }
